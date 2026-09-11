@@ -167,6 +167,12 @@
       if (!setupAnim()) { var n = 0, iv = setInterval(function () { if (setupAnim() || ++n > 40) clearInterval(iv); }, 200); }
     });
     mv.addEventListener('error', function () { status.textContent = 'Couldn’t load this model. Try again online once, then retry.'; });
+    // Entering AR: the numbered dots are hidden via CSS (they can't open a card in
+    // the AR session); also close any open card so no stale leader line is drawn.
+    mv.addEventListener('ar-status', function (e) {
+      var s = e.detail && e.detail.status;
+      if (s === 'session-started' || s === 'object-placed') close();
+    });
 
     var annos = t.annotations || [];
 

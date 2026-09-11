@@ -649,6 +649,11 @@ model-viewer.scene-energy { /* Energy — plasma glow (ready for its model) */
 .ic-tts, .tour-tts { -webkit-appearance: none; appearance: none; border: none; background: transparent; cursor: pointer; color: var(--primary); padding: 4px; border-radius: 8px; display: inline-grid; place-items: center; flex: 0 0 auto; }
 .ic-tts svg, .tour-tts svg { width: 18px; height: 18px; }
 .stage.no-labels .hotspot { display: none; }
+/* Hide the numbered dots while an AR session is active (WebXR on Android places
+   the model in the room but the description cards can't be opened there, so the
+   numbers would just be confusing). Labels stay in the in-page 3D view. */
+model-viewer[ar-status="session-started"] .hotspot,
+model-viewer[ar-status="object-placed"] .hotspot { display: none !important; }
 
 .tour-ov { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column;
   padding: max(16px, env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom));
