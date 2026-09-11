@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "io.github.knightxl123.bioversear",
+    "sha256_cert_fingerprints": ["16:E9:2E:2E:1E:3F:D4:4C:C3:A9:8F:31:41:D2:14:1D:8B:54:71:FD:5C:34:40:3E:A2:4F:8F:2E:B6:83:D0:42"]
+  }
+}]

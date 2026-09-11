@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#185FA5">
+  <title>BioVerseAR — Home</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="BioVerseAR">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app has-nav">
+    <header class="pf-head" style="margin-bottom:12px">
+      <h1 class="page-h">Home</h1>
+      <p class="pf-sub">Keep learning, keep exploring!</p>
+    </header>
+
+    <section class="pf-hero home-hero">
+      <img class="pf-hero-bg" src="assets/splash/tarsier-hero-scene.webp" alt="" aria-hidden="true">
+      <div class="home-hero-chips">
+        <button class="iconbtn" id="join-btn" type="button" aria-label="Join a competition" title="Join a competition">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 21V4.2M5 4.2h11.2l-2.2 3.3 2.2 3.3H5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="iconbtn" id="help-btn" type="button" aria-label="How this works" title="How this works">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.3 2.4c-.7.3-1.4.9-1.4 1.8v.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="16.7" r="0.7" fill="currentColor"/></svg>
+        </button>
+        <a class="iconbtn" href="leaderboard.html" aria-label="Leaderboard" title="Leaderboard">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M8 4h8v4a4 4 0 01-8 0V4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 5H5v2a3 3 0 003 3M16 5h3v2a3 3 0 01-3 3M9 20h6M12 12v4M9.5 20v-1a2.5 2.5 0 015 0v1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+      <div class="pf-hero-card">
+        <a class="home-hero-av" id="home-av" href="profile.html" aria-label="Your profile">?</a>
+        <div class="pf-hero-info">
+          <div class="pf-hero-name">Hi, <span id="hi-alias">student</span>! 👋</div>
+          <div class="pf-hero-class">Keep learning, keep exploring!</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="home-stats">
+      <div class="hstat">
+        <span class="hstat-ic pts"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.5 6 .7-4.4 4.1 1.2 5.9L12 16.9 6.6 19.2l1.2-5.9L3.4 9.2l6-.7z" fill="currentColor"/></svg></span>
+        <span class="hstat-t"><b id="stat-points">0</b><small>points</small></span>
+      </div>
+      <div class="hstat">
+        <span class="hstat-ic bdg"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="5.2" stroke="currentColor" stroke-width="1.6"/><path d="M9 13.5L7.5 21l4.5-2.6L16.5 21 15 13.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+        <span class="hstat-t"><b id="stat-badges">0/7</b><small>badges</small></span>
+      </div>
+    </div>
+
+    <a class="continue" id="continue-card" hidden></a>
+
+    <h2 class="section-title">Explore topics</h2>
+    <div class="topics" id="topics" role="list"></div>
+
+    <div class="spacer-grow"></div>
+  </div>
+
+  <!-- Join / manage competition (opened from the header flag icon) -->
+  <div class="modal-ov" id="join-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="join-title">
+      <button class="modal-x" id="join-close" type="button" aria-label="Close">&times;</button>
+      <div class="modal-ic" aria-hidden="true">🏁</div>
+      <h3 id="join-title">Join a competition</h3>
+      <p class="modal-desc" id="join-desc">Enter the class code from your teacher to compete on the leaderboard.</p>
+      <input class="modal-input" id="join-code" type="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="40" placeholder="e.g. 7-RIZAL">
+      <div class="form-msg" id="join-msg"></div>
+      <button class="btn" id="join-do" type="button">Join competition</button>
+      <button class="btn secondary" id="join-leave" type="button" hidden style="margin-top:8px">Leave competition</button>
+    </div>
+  </div>
+
+  <nav id="bottomnav"></nav>
+
+  <script src="assets/vendor/supabase.min.js"></script>
+  <script src="topics.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    var profile = BV.requireAuth(); if (!profile) return;
+    var $ = function (id) { return document.getElementById(id); };
+
+    var ICON = {
+      cube: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2.8l7.5 4.3v9.8L12 21.2 4.5 16.9V7.1L12 2.8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 2.8v18.4M4.5 7.1L12 11.4l7.5-4.3" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
+      lock: '<svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10.5" width="14" height="9.5" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10.5V8a4 4 0 018 0v2.5" stroke="currentColor" stroke-width="1.6"/></svg>',
+      medal: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="5.2" stroke="currentColor" stroke-width="1.5"/><path d="M9 13.5L7.5 21l4.5-2.6L16.5 21 15 13.5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
+      chevron: '<svg viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    };
+
+    $('hi-alias').textContent = profile.alias;
+    // Personalise the hero with the student's chosen avatar (falls back to their
+    // initial for accounts made before avatars existed).
+    var avEl = $('home-av');
+    var headAv = profile.avatar && BV.avatarSvg(profile.avatar);
+    if (avEl) avEl.innerHTML = headAv || (profile.alias.trim()[0] || '?').toUpperCase();
+    var stats = BV.overallStats();
+    $('stat-points').textContent = stats.points;
+    $('stat-badges').textContent = stats.badges + '/' + stats.total;
+
+    var topics = window.TOPICS || [], byId = {};
+    topics.forEach(function (t) { byId[t.id] = t; });
+    var ready = topics.filter(function (t) { return t.ready; });
+
+    // ---- Continue-learning card: last-visited (or first unfinished) topic ----
+    var lastId = BV.getLastTopic(), cont = null;
+    if (lastId && byId[lastId] && byId[lastId].ready) cont = byId[lastId];
+    if (!cont) cont = ready.filter(function (t) { return !BV.hasBadge(t.id); })[0] || ready[0];
+    if (cont) {
+      var p = BV.topicProgress(cont.id);
+      var card = $('continue-card'); card.hidden = false;
+      card.href = 'topic.html?topic=' + encodeURIComponent(cont.id);
+      card.innerHTML =
+        '<div class="ct-label">Continue learning</div>' +
+        '<div class="ct-row"><div class="ct-thumb">' + BV.topicVisual(cont.id).icon + '</div>' +
+          '<div class="ct-name">' + BV.escape(cont.name) + '</div>' +
+          '<span class="ct-go">' + (p.attempted ? 'Continue' : 'Start') + '</span></div>' +
+        '<div class="ct-bar"><i style="width:' + p.pct + '%"></i></div>' +
+        '<div class="ct-sub">' + (p.attempted ? (p.passedCount + ' of 3 levels passed · ' + p.points + ' pts') : 'Not started yet — tap to begin') + '</div>';
+    }
+
+    // ---- Topic list ----
+    var host = $('topics');
+    topics.forEach(function (t) {
+      var badgeRow = '<div class="badge">' + ICON.medal + '<span>' + BV.escape(t.badge) + '</span></div>';
+      var el;
+      if (t.ready) {
+        var pr = BV.topicProgress(t.id);
+        var vis = BV.topicVisual(t.id);
+        var arNote = t.model ? '' : '<div class="topic-note soon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.6 5.5 6 .7-4.4 4.1 1.2 5.9L12 16.9 6.6 19.2l1.2-5.9L3.4 9.2l6-.7z" fill="currentColor"/></svg>AR world coming soon</div>';
+        var progBar = pr.attempted ? '<div class="topic-prog"><i style="width:' + pr.pct + '%;background:' + vis.c + '"></i></div>' : '';
+        var go = pr.attempted
+          ? '<div class="go" style="font-size:13px;font-weight:800;color:' + vis.c + '">' + pr.pct + '%</div>'
+          : '<div class="go">' + ICON.chevron + '</div>';
+        el = document.createElement('a');
+        el.className = 'topic'; el.setAttribute('role', 'listitem');
+        el.href = 'topic.html?topic=' + encodeURIComponent(t.id);
+        el.innerHTML = '<div class="thumb" style="background:' + vis.b + ';color:' + vis.c + '">' + vis.icon + '</div>' +
+          '<div class="body"><div class="name">' + BV.escape(t.name) + '</div>' + badgeRow + arNote + progBar + '</div>' + go;
+      } else {
+        el = document.createElement('div');
+        el.className = 'topic locked'; el.setAttribute('role', 'listitem'); el.setAttribute('aria-disabled', 'true');
+        el.innerHTML = '<div class="thumb">' + ICON.lock + '</div>' +
+          '<div class="body"><div class="name">' + BV.escape(t.name) + '</div>' + badgeRow + '</div>' +
+          '<div class="go"><span class="pill">' + ICON.lock + 'Coming soon</span></div>';
+      }
+      host.appendChild(el);
+    });
+
+    BV.renderNav('home');
+
+    // ---- Join / manage a competition from the header flag icon ----
+    var jb = $('join-btn'), jm = $('join-modal'), jMsg = $('join-msg');
+    function refreshJoinBtn() {
+      var competing = BV.isCompetitor();
+      jb.classList.toggle('on', competing);
+      jb.setAttribute('title', competing ? 'Your competition' : 'Join a competition');
+      jb.setAttribute('aria-label', competing ? 'Your competition' : 'Join a competition');
+    }
+    function openJoin() {
+      var code = (BV.getProfile() || {}).classCode || '';
+      jMsg.className = 'form-msg';
+      if (code) {
+        $('join-title').textContent = 'Your competition';
+        $('join-desc').innerHTML = 'You’re competing in class <b>' + BV.escape(BV.classDisplay()) + '</b> — you’re on the class leaderboard.';
+        $('join-code').hidden = true; $('join-do').hidden = true; $('join-leave').hidden = false;
+      } else {
+        $('join-title').textContent = 'Join a competition';
+        $('join-desc').textContent = 'Enter the class code from your teacher to compete on the leaderboard. No code? Keep exploring solo — you can join any time.';
+        $('join-code').hidden = false; $('join-code').value = ''; $('join-do').hidden = false; $('join-leave').hidden = true;
+      }
+      jm.hidden = false;
+    }
+    function closeJoin() { jm.hidden = true; }
+    jb.addEventListener('click', openJoin);
+    $('join-close').addEventListener('click', closeJoin);
+    jm.addEventListener('click', function (e) { if (e.target === jm) closeJoin(); }); // tap backdrop to close
+    $('join-code').addEventListener('input', function () { jMsg.className = 'form-msg'; });
+    $('join-do').addEventListener('click', function () {
+      var code = $('join-code').value.trim().replace(/\s+/g, ' ');
+      if (!code) { jMsg.className = 'form-msg show err'; jMsg.textContent = 'Enter a class code first.'; return; }
+      var btn = this; btn.disabled = true; var t = btn.textContent; btn.textContent = 'Joining…';
+      BV.joinClass(code).then(function (r) {
+        btn.disabled = false; btn.textContent = t;
+        if (r.ok) { jMsg.className = 'form-msg show ok'; jMsg.textContent = 'Joined! You’re on the board.'; refreshJoinBtn(); setTimeout(closeJoin, 900); }
+        else { jMsg.className = 'form-msg show err'; jMsg.textContent = r.error; }
+      });
+    });
+    $('join-leave').addEventListener('click', function () {
+      if (!confirm('Leave the competition? You’ll go back to exploring solo.')) return;
+      var btn = this; btn.disabled = true; var t = btn.textContent; btn.textContent = 'Leaving…';
+      BV.joinClass('').then(function (r) {
+        btn.disabled = false; btn.textContent = t;
+        if (r.ok) { jMsg.className = 'form-msg show ok'; jMsg.textContent = 'You’re exploring solo again.'; refreshJoinBtn(); setTimeout(closeJoin, 900); }
+        else { jMsg.className = 'form-msg show err'; jMsg.textContent = r.error; }
+      });
+    });
+    refreshJoinBtn();
+
+    // ---- Guided tour of the home screen (auto on first visit; replay via "?") ----
+    var HOME_TOUR = [
+      { target: null, title: 'Welcome to BioVerseAR!', text: 'Here’s a quick tour of your home base — tap Next to walk through it.' },
+      { target: '.home-stats', title: 'Your progress', text: 'The points and badges you earn show up here and grow as you play.' },
+      { target: '#topics .topic', title: 'Explore a topic', text: 'Tap any topic to view it in AR and take its quiz. Each one has its own badge to earn.' },
+      { target: '#join-btn', title: 'Join a competition', text: 'Got a class code from your teacher? Tap the flag to join and compete on the leaderboard. No code? Keep exploring solo.' },
+      { target: '#bottomnav', title: 'Find your way', text: 'Jump to your Badges, the Leaderboard, or your Profile from down here anytime.' },
+      { target: '#help-btn', title: 'Need this again?', text: 'Tap the “?” any time to replay this tour. Have fun exploring!' }
+    ];
+    BV.tourOnce(HOME_TOUR, 'bioversear.tour.home.v1');
+    $('help-btn').addEventListener('click', function () { BV.tour(HOME_TOUR, null); });
+  })();
+  </script>
+</body>
+</html>

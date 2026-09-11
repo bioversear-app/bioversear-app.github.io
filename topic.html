@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#185FA5">
+  <title>BioVerseAR — Topic</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="BioVerseAR">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <div class="ar-head">
+      <a class="iconbtn" href="dashboard.html" aria-label="Back to topics">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <div class="title" id="topic-name">Topic</div>
+    </div>
+
+    <div class="badge-card" id="badge-card">
+      <div class="badge-medal" id="badge-medal">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="5.2" stroke="currentColor" stroke-width="1.6"/><path d="M9 13.5L7.5 21l4.5-2.6L16.5 21 15 13.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="badge-info">
+        <div class="badge-name" id="badge-name">Badge</div>
+        <div class="badge-state" id="badge-state">Locked — complete the post-test to earn it</div>
+      </div>
+    </div>
+
+    <h2 class="section-title">Learn</h2>
+    <a class="action" href="#" id="ar-link">
+      <span class="action-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2.8l7.5 4.3v9.8L12 21.2 4.5 16.9V7.1L12 2.8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 2.8v18.4M4.5 7.1L12 11.4l7.5-4.3" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
+      <span class="action-body"><span class="action-title">Explore in AR</span><span class="action-sub">View the 3D model &amp; annotations</span></span>
+      <span class="action-go">›</span>
+    </a>
+
+    <h2 class="section-title">Take the quiz</h2>
+    <p class="section-note">Choose your challenge — 10 questions, no penalty for wrong answers.</p>
+
+    <a class="action diff-card" href="#" id="diff-easy" data-diff="easy">
+      <span class="action-ic diff-ic easy"><span class="diff-dot"></span></span>
+      <span class="action-body"><span class="action-title">Easy <span class="diff-pts">5 pts each</span></span><span class="action-sub" id="easy-sub">Recall &amp; basic understanding</span></span>
+      <span class="action-go" id="easy-go">›</span>
+    </a>
+    <a class="action diff-card" href="#" id="diff-medium" data-diff="medium">
+      <span class="action-ic diff-ic medium"><span class="diff-dot"></span></span>
+      <span class="action-body"><span class="action-title">Medium <span class="diff-pts">15 pts each</span></span><span class="action-sub" id="medium-sub">Apply &amp; explain concepts</span></span>
+      <span class="action-go" id="medium-go">›</span>
+    </a>
+    <a class="action diff-card" href="#" id="diff-hard" data-diff="hard">
+      <span class="action-ic diff-ic hard"><span class="diff-dot"></span></span>
+      <span class="action-body"><span class="action-title">Hard <span class="diff-pts">30 pts each</span></span><span class="action-sub" id="hard-sub">Analyse &amp; solve problems</span></span>
+      <span class="action-go" id="hard-go">›</span>
+    </a>
+
+    <div class="spacer-grow"></div>
+  </div>
+
+  <script src="topics.js"></script>
+  <script src="questions.js"></script>
+  <script src="app.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    var profile = BV.requireAuth(); if (!profile) return;
+    var t = BV.topic(new URLSearchParams(location.search).get('topic'));
+    if (!t || !t.ready) { location.replace('dashboard.html'); return; }
+    BV.setLastTopic(t.id);
+    document.title = 'BioVerseAR — ' + t.name;
+    document.getElementById('topic-name').textContent = t.name;
+
+    // badge — show the topic's own emblem (its icon in its colour when earned,
+    // greyed while locked), matching the Badges shelf.
+    document.getElementById('badge-name').textContent = t.badge;
+    var earned = BV.hasBadge(t.id);
+    var vis = BV.topicVisual(t.id);
+    var medal = document.getElementById('badge-medal');
+    medal.innerHTML = vis.icon;
+    if (earned) { medal.style.background = vis.b; medal.style.color = vis.c; }
+    var card = document.getElementById('badge-card');
+    card.classList.toggle('earned', earned);
+    document.getElementById('badge-state').textContent = earned
+      ? 'Earned — nice work!' : 'Locked — pass any quiz (60%+) to earn it';
+
+    // AR is available only when this topic has a 3D model wired; otherwise show a
+    // disabled "coming soon" action. Quizzes below work regardless.
+    var arLink = document.getElementById('ar-link');
+    if (t.model) {
+      arLink.href = 'ar.html?topic=' + encodeURIComponent(t.id);
+    } else {
+      arLink.classList.add('disabled', 'soon');
+      arLink.setAttribute('aria-disabled', 'true');
+      arLink.removeAttribute('href');
+      arLink.querySelector('.action-title').textContent = 'AR world coming soon';
+      arLink.querySelector('.action-sub').textContent = 'A 3D model is on the way — take the quiz below to earn this badge!';
+      arLink.querySelector('.action-go').innerHTML = '<span class="soon-pill">Soon</span>';
+      arLink.addEventListener('click', function (e) { e.preventDefault(); });
+    }
+    // Difficulty picker: link each card to the quiz and show the best result so far.
+    var a = BV.getAttempts(t.id);
+    ['easy', 'medium', 'hard'].forEach(function (d) {
+      document.getElementById('diff-' + d).href = 'quiz.html?topic=' + encodeURIComponent(t.id) + '&diff=' + d;
+      var at = a[d];
+      if (at && typeof at.score === 'number') {
+        var passed = at.max && at.score >= at.max * 0.6;
+        document.getElementById(d + '-sub').textContent =
+          'Best: ' + at.correct + '/' + at.total + ' correct · ' + at.score + ' pts' + (passed ? ' ✓' : '');
+        document.getElementById(d + '-go').textContent = 'Retake ›';
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

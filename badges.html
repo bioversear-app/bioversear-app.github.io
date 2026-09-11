@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#185FA5">
+  <title>BioVerseAR — Badges</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="BioVerseAR">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app has-nav">
+    <section class="pf-hero home-hero">
+      <img class="pf-hero-bg" src="assets/splash/tarsier-hero-scene.webp" alt="" aria-hidden="true">
+      <div class="pf-hero-card">
+        <span class="home-hero-av" id="home-av" aria-hidden="true">?</span>
+        <div class="pf-hero-info">
+          <div class="pf-hero-name">Badges</div>
+          <div class="pf-hero-class" id="hero-sub">Collect a badge for every topic.</div>
+        </div>
+      </div>
+    </section>
+    <p class="acct-note" style="margin:0 2px 16px">Earn a badge by completing each topic's post-test.</p>
+    <div class="badge-grid" id="badge-grid"></div>
+    <div class="spacer-grow"></div>
+  </div>
+
+  <nav id="bottomnav"></nav>
+
+  <script src="topics.js"></script>
+  <script src="app.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    if (!BV.requireAuth()) return;
+    var LOCK = '<svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10.5" width="14" height="9.5" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 10.5V8a4 4 0 018 0v2.5" stroke="currentColor" stroke-width="1.7"/></svg>';
+    var CHECK = '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    var topics = window.TOPICS || [];
+    var stats = BV.overallStats();
+    document.getElementById('hero-sub').textContent = 'You have ' + stats.badges + ' of ' + stats.total + ' badges.';
+    // Personalise the hero with the student's avatar (or their initial).
+    var prof = BV.getProfile() || {}, avEl = document.getElementById('home-av');
+    var av = prof.avatar && BV.avatarSvg(prof.avatar);
+    if (avEl) avEl.innerHTML = av || ((prof.alias || '?').trim()[0] || '?').toUpperCase();
+
+    var grid = document.getElementById('badge-grid');
+    topics.forEach(function (t) {
+      var earned = BV.hasBadge(t.id);
+      var vis = BV.topicVisual(t.id);
+      var cell = document.createElement('div');
+      cell.className = 'badge-cell' + (earned ? ' earned' : ' locked');
+      // Earned = the topic's own icon in its colour, with a gold check; locked =
+      // the same icon greyed out with a small lock, so you can see what's next.
+      var disc = earned
+        ? '<div class="badge-disc earned" style="background:' + vis.b + ';color:' + vis.c + '">' + vis.icon + '</div>'
+        : '<div class="badge-disc">' + vis.icon + '</div>';
+      var corner = earned
+        ? '<span class="badge-ribbon">' + CHECK + '</span>'
+        : '<span class="badge-lock">' + LOCK + '</span>';
+      cell.innerHTML =
+        corner + disc +
+        '<div class="bname">' + BV.escape(t.badge) + '</div>' +
+        '<div class="btopic">' + BV.escape(t.name) + '</div>' +
+        '<div class="bstate ' + (earned ? 'earned' : 'locked') + '"' + (earned ? ' style="color:' + vis.c + '"' : '') + '>' + (earned ? '★ Earned' : 'Locked') + '</div>';
+      grid.appendChild(cell);
+    });
+
+    BV.renderNav('badges');
+  })();
+  </script>
+</body>
+</html>

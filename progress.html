@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#185FA5">
+  <title>BioVerseAR — Progress</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="BioVerseAR">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app has-nav">
+    <section class="pf-hero home-hero">
+      <img class="pf-hero-bg" src="assets/splash/tarsier-hero-scene.webp" alt="" aria-hidden="true">
+      <div class="pf-hero-card">
+        <span class="home-hero-av" id="home-av" aria-hidden="true">?</span>
+        <div class="pf-hero-info">
+          <div class="pf-hero-name">Progress</div>
+          <div class="pf-hero-class" id="hero-sub">Keep going — you're doing great!</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="stat-row" style="margin-bottom:20px">
+      <div class="stat amber"><div class="num" id="s-badges">0</div><div class="lbl">Badges</div></div>
+      <div class="stat"><div class="num" id="s-done">0</div><div class="lbl">Topics done</div></div>
+      <div class="stat"><div class="num" id="s-points">0</div><div class="lbl">Total points</div></div>
+    </div>
+
+    <h2 class="section-title">By topic</h2>
+    <div id="prog-list"></div>
+
+    <a class="btn secondary" href="leaderboard.html" style="margin-top:6px">View leaderboard</a>
+    <div class="spacer-grow"></div>
+  </div>
+
+  <nav id="bottomnav"></nav>
+
+  <script src="topics.js"></script>
+  <script src="app.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    if (!BV.requireAuth()) return;
+    var $ = function (id) { return document.getElementById(id); };
+
+    var stats = BV.overallStats();
+    $('s-badges').textContent = stats.badges;
+    $('s-done').textContent = stats.done;
+    $('s-points').textContent = stats.points;
+    $('hero-sub').textContent = stats.done + ' of ' + stats.total + ' topics done · ' + stats.points + ' pts';
+    // Personalise the hero with the student's avatar (or their initial).
+    var prof = BV.getProfile() || {}, avEl = $('home-av');
+    var av = prof.avatar && BV.avatarSvg(prof.avatar);
+    if (avEl) avEl.innerHTML = av || ((prof.alias || '?').trim()[0] || '?').toUpperCase();
+
+    var list = $('prog-list');
+    (window.TOPICS || []).forEach(function (t) {
+      var item = document.createElement('div');
+      item.className = 'prog-item';
+      if (!t.ready) {
+        item.innerHTML =
+          '<div class="pi-head"><div class="pi-name">' + BV.escape(t.name) + '</div><div class="pi-pct muted">Soon</div></div>' +
+          '<div class="pi-meta"><span>Coming soon</span></div>';
+        list.appendChild(item); return;
+      }
+      var p = BV.topicProgress(t.id);
+      var meta = p.attempted
+        ? ['easy', 'medium', 'hard'].map(function (d) {
+            var x = p.per[d], lbl = d.charAt(0).toUpperCase() + d.slice(1);
+            return '<span>' + lbl + ' <b>' + (x ? (x.correct + '/' + x.total) : '—') + '</b></span>';
+          }).join('') +
+          (p.done ? '<span style="color:var(--accent);font-weight:700">★ Badge</span>' : '')
+        : '<span>Not started yet</span>';
+      item.innerHTML =
+        '<div class="pi-head"><div class="pi-name">' + BV.escape(t.name) + '</div>' +
+          '<div class="pi-pct' + (p.attempted ? '' : ' muted') + '">' + p.pct + '%</div></div>' +
+        '<div class="pi-bar"><i style="width:' + p.pct + '%"></i></div>' +
+        '<div class="pi-meta">' + meta + '</div>';
+      list.appendChild(item);
+    });
+
+    BV.renderNav('progress');
+  })();
+  </script>
+</body>
+</html>

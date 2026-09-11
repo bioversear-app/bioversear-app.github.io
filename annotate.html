@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>BioVerseAR — Annotate models</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+  <script type="module" src="assets/vendor/model-viewer.min.js"></script>
+  <script>
+    customElements.whenDefined('model-viewer').then(function () {
+      var MV = customElements.get('model-viewer');
+      MV.dracoDecoderLocation   = new URL('assets/vendor/draco/', document.baseURI).href;
+      MV.ktx2TranscoderLocation = new URL('assets/vendor/basis/', document.baseURI).href;
+    });
+  </script>
+  <style>
+    :root{--ink:#042C53;--muted:#5A6B7B;--line:#D7E2EE;--primary:#185FA5;--bg:#F4F8FC;--surface:#fff;--accent:#C77D0A;--radius:14px;}
+    *{box-sizing:border-box;}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);}
+    header{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;}
+    header h1{font-size:16px;margin:0;font-weight:800;flex:0 0 auto;}
+    header select{font:inherit;font-size:14px;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);}
+    .grow{flex:1;}
+    .btn{font:inherit;font-size:13px;font-weight:700;border:0;border-radius:999px;padding:9px 15px;cursor:pointer;}
+    .btn.p{background:var(--primary);color:#fff;}
+    .btn.g{background:#EEF3F9;color:var(--muted);}
+    .btn.d{background:#FEF3F2;color:#B42318;}
+    .wrap{display:grid;grid-template-columns:1fr 360px;gap:14px;padding:14px 16px;align-items:start;}
+    @media (max-width:820px){.wrap{grid-template-columns:1fr;}}
+    .viewer{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+    model-viewer{width:100%;height:64vh;min-height:380px;background:#f4f8fc;--min-hotspot-opacity:1;}
+    .hint{position:absolute;left:12px;top:12px;right:12px;background:rgba(4,44,83,.82);color:#fff;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:999px;pointer-events:none;text-align:center;}
+    /* numbered pin on the model */
+    .pin{--c:var(--primary);width:26px;height:26px;border-radius:50%;border:2px solid #fff;background:var(--c);color:#fff;font-weight:800;font-size:13px;display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.35);}
+    .pin.sel{outline:3px solid #fff;outline-offset:2px;--c:var(--accent);}
+    /* fixed centre reticle: move a part into it, then "Drop pin here" */
+    .reticle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:46px;height:46px;border:2.5px solid rgba(255,255,255,.9);border-radius:50%;pointer-events:none;box-shadow:0 0 0 2px rgba(0,0,0,.28),0 0 10px rgba(0,0,0,.3);z-index:4;transition:border-color .12s,box-shadow .12s;}
+    .reticle::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.95);}
+    .reticle.on{border-color:#19C39A;box-shadow:0 0 0 2px rgba(0,0,0,.25),0 0 14px rgba(25,195,154,.65);}
+    .reticle.on::after{background:#19C39A;}
+    /* live code readout bar at the bottom of the viewer */
+    .readout{position:absolute;left:12px;right:12px;bottom:12px;display:flex;align-items:center;gap:8px;background:rgba(4,44,83,.92);border-radius:12px;padding:8px 8px 8px 12px;z-index:6;box-shadow:0 4px 14px rgba(0,0,0,.3);}
+    .readout code{flex:1;min-width:0;color:#cfe0ee;font-family:ui-monospace,monospace;font-size:12px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .readout code.live{color:#8ff0d0;}
+    .mini{font:inherit;font-size:12.5px;font-weight:800;border:0;border-radius:999px;padding:8px 13px;cursor:pointer;flex:0 0 auto;}
+    .mini.p{background:var(--primary);color:#fff;}
+    .mini.g{background:#EEF3F9;color:var(--muted);}
+    .mini:disabled{opacity:.4;cursor:default;}
+    .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px;}
+    .panel h2{font-size:14px;margin:0 0 4px;}
+    .panel .sub{font-size:12.5px;color:var(--muted);margin:0 0 12px;}
+    .row{border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px;}
+    .row.sel{border-color:var(--primary);box-shadow:0 0 0 2px rgba(24,95,165,.15);}
+    .row .rh{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+    .row .num{width:24px;height:24px;border-radius:50%;background:var(--primary);color:#fff;font-weight:800;font-size:12px;display:grid;place-items:center;flex:0 0 auto;}
+    .row .pos{font-size:11px;color:var(--muted);font-family:ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+    .row input,.row textarea{width:100%;font:inherit;font-size:13.5px;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);margin-bottom:6px;}
+    .row textarea{min-height:52px;resize:vertical;}
+    .row .del{font-size:12px;color:#B42318;background:none;border:0;cursor:pointer;padding:2px 0;font-weight:700;}
+    .empty{color:var(--muted);font-size:13px;text-align:center;padding:20px 8px;}
+    .note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px;}
+    .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;font-weight:600;padding:10px 16px;border-radius:999px;opacity:0;transition:opacity .2s;z-index:20;}
+    .toast.show{opacity:1;}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Annotate</h1>
+    <select id="topic-sel" aria-label="Model"></select>
+    <span class="grow"></span>
+    <button class="btn g" id="clear" type="button">Clear pins</button>
+    <button class="btn p" id="copy" type="button">Copy labels</button>
+  </header>
+
+  <div class="wrap">
+    <div class="viewer">
+      <model-viewer id="mv" camera-controls interaction-prompt="none" shadow-intensity="0" exposure="1" alt="model"></model-viewer>
+      <div class="reticle" id="reticle"></div>
+      <div class="hint">Pinch / drag to move a part into the circle. When it turns green, its code shows below — copy it and pair it with a label, or tap Capture.</div>
+      <div class="readout" id="readout">
+        <code id="code">Aim the green circle at a part…</code>
+        <button class="mini g" id="copyone" type="button" disabled>Copy code</button>
+        <button class="mini p" id="capture" type="button" disabled>Capture</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Labels <span id="count" style="color:var(--muted);font-weight:600"></span></h2>
+      <p class="sub">Aim the circle at a part and tap <b>Capture</b> — it adds a numbered spot here with its code filled in. Name it, then <b>Copy labels</b> and send to Claude. (Or just <b>Copy code</b> for one spot and tell Claude its label.)</p>
+      <div id="list"><div class="empty">No spots yet. Aim the green circle at a part and tap Capture.</div></div>
+      <p class="note">Tip: pinch/drag the model to line a part up in the circle — no need to tap the model itself. Tap a row to select it; use <b>Remove</b> to delete.</p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="topics.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    var $ = function (id) { return document.getElementById(id); };
+    var mv = $('mv'), list = $('list');
+    var topics = (window.TOPICS || []).filter(function (t) { return t.model; });
+    var anns = [];       // { key, title, body, position, normal, el }
+    var keySeq = 0, selKey = null;
+
+    // ---- topic picker ----
+    var params = new URLSearchParams(location.search);
+    var current = params.get('topic') || (topics[0] && topics[0].id);
+    var sel = $('topic-sel');
+    sel.innerHTML = topics.map(function (t) { return '<option value="' + t.id + '">' + t.name + '</option>'; }).join('');
+    sel.value = current;
+    sel.addEventListener('change', function () { location.search = '?topic=' + sel.value; });
+
+    var topic = topics.filter(function (t) { return t.id === current; })[0] || topics[0];
+    if (!topic) { document.querySelector('.wrap').innerHTML = '<p style="padding:20px">No models with a wired file yet.</p>'; return; }
+    document.title = 'Annotate — ' + topic.name;
+    if (topic.space) mv.style.background = '#0a0e1e';
+    mv.src = topic.model;
+
+    // Pre-load any annotations the topic already has, so you can edit/extend.
+    (topic.annotations || []).forEach(function (a) { addPin(a.position, a.normal, a.title || '', a.body || ''); });
+
+    function fmt(v) { return [v.x, v.y, v.z].map(function (n) { return (+n).toFixed(5); }).join(' '); }
+
+    // ---- add a pin ----
+    function addPin(position, normal, title, body) {
+      var key = ++keySeq;
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'pin';
+      btn.setAttribute('slot', 'hotspot-' + key);
+      btn.setAttribute('data-position', position);
+      btn.setAttribute('data-normal', normal || '0 1 0');
+      btn.addEventListener('click', function (e) { e.stopPropagation(); select(key); });
+      mv.appendChild(btn);
+      anns.push({ key: key, title: title || '', body: body || '', position: position, normal: normal || '0 1 0', el: btn });
+      render();
+      select(key);
+    }
+
+    function select(key) {
+      selKey = key;
+      anns.forEach(function (a) { a.el.classList.toggle('sel', a.key === key); });
+      render();
+      var row = document.querySelector('.row[data-key="' + key + '"]');
+      if (row) { row.scrollIntoView({ block: 'nearest' }); var ti = row.querySelector('.t-in'); if (ti && !ti.value) ti.focus(); }
+    }
+
+    function remove(key) {
+      var i = anns.findIndex(function (a) { return a.key === key; });
+      if (i < 0) return;
+      if (anns[i].el.parentNode) anns[i].el.parentNode.removeChild(anns[i].el);
+      anns.splice(i, 1); if (selKey === key) selKey = null; render();
+    }
+
+    // ---- render list + pin numbers ----
+    function render() {
+      $('count').textContent = anns.length ? '(' + anns.length + ')' : '';
+      anns.forEach(function (a, i) { a.el.textContent = (i + 1); });
+      if (!anns.length) { list.innerHTML = '<div class="empty">No spots yet. Aim the green circle at a part and tap Capture.</div>'; return; }
+      list.innerHTML = '';
+      anns.forEach(function (a, i) {
+        var row = document.createElement('div');
+        row.className = 'row' + (a.key === selKey ? ' sel' : ''); row.setAttribute('data-key', a.key);
+        row.innerHTML =
+          '<div class="rh"><span class="num">' + (i + 1) + '</span>' +
+          '<span class="pos" title="' + a.position + '">' + a.position + '</span>' +
+          '<button class="del" type="button">Remove</button></div>' +
+          '<input class="t-in" placeholder="Label (e.g. Nucleus)" value="' + a.title.replace(/"/g, '&quot;') + '">' +
+          '<textarea class="b-in" placeholder="Description (optional)">' + a.body.replace(/</g, '&lt;') + '</textarea>';
+        row.querySelector('.t-in').addEventListener('input', function (e) { a.title = e.target.value; });
+        row.querySelector('.b-in').addEventListener('input', function (e) { a.body = e.target.value; });
+        row.querySelector('.del').addEventListener('click', function () { remove(a.key); });
+        row.addEventListener('click', function (e) { if (!e.target.closest('button')) select(a.key); });
+        list.appendChild(row);
+      });
+    }
+
+    // ---- centre reticle + live code readout. Pinch/drag a part into the circle;
+    // when the centre ray hits geometry the readout shows that spot's code. Copy it,
+    // or tap Capture to add a labelled row. No tapping/pointing on the model. ----
+    var reticle = $('reticle'), codeEl = $('code'), copyOne = $('copyone'), captureBtn = $('capture');
+    var lastHit = null;
+    function centerHit() {
+      if (!mv.loaded) return null;
+      var r = mv.getBoundingClientRect();
+      return mv.positionAndNormalFromPoint(r.width / 2, r.height / 2);
+    }
+    function snippet(h) { return 'position: "' + h.position + '", normal: "' + h.normal + '"'; }
+    var rT = 0;
+    function updateReticle() {
+      var now = Date.now(); if (now - rT < 60) return; rT = now;   // throttle raycasts
+      var hit = centerHit();
+      if (hit) {
+        lastHit = { position: fmt(hit.position), normal: fmt(hit.normal) };
+        reticle.classList.add('on');
+        codeEl.textContent = snippet(lastHit); codeEl.classList.add('live');
+        copyOne.disabled = false; captureBtn.disabled = false;
+      } else {
+        lastHit = null;
+        reticle.classList.remove('on');
+        codeEl.textContent = 'Aim the green circle at a part…'; codeEl.classList.remove('live');
+        copyOne.disabled = true; captureBtn.disabled = true;
+      }
+    }
+    mv.addEventListener('camera-change', updateReticle);
+    mv.addEventListener('load', function () { setTimeout(updateReticle, 60); });
+
+    copyOne.addEventListener('click', function () {
+      if (!lastHit) { toast('Aim at a part first'); return; }
+      copyText(snippet(lastHit), 'Code copied — paste it to Claude with a label');
+    });
+    captureBtn.addEventListener('click', function () {
+      if (!lastHit) { toast('Aim at a part first'); return; }
+      addPin(lastHit.position, lastHit.normal);
+      toast('Captured — name it in the list');
+    });
+
+    // ---- export ----
+    function exportText() {
+      var items = anns.map(function (a, i) {
+        var t = (a.title || 'Part ' + (i + 1)).replace(/"/g, '\\"');
+        var b = (a.body || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        return '      { id: ' + (i + 1) + ', title: "' + t + '", position: "' + a.position + '", normal: "' + a.normal + '", body: "' + b + '" }';
+      }).join(',\n');
+      return 'Topic: ' + topic.id + '\n\n    annotations: [\n' + items + '\n    ]';
+    }
+    function copyText(txt, okMsg) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(function () { toast(okMsg); }, function () { fallbackCopy(txt, okMsg); });
+      } else fallbackCopy(txt, okMsg);
+    }
+    function fallbackCopy(txt, okMsg) {
+      var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); toast(okMsg || 'Copied'); } catch (e) { toast('Copy failed — select the text manually'); }
+      document.body.removeChild(ta);
+    }
+    $('copy').addEventListener('click', function () {
+      if (!anns.length) { toast('No spots to copy yet'); return; }
+      copyText(exportText(), 'Copied ' + anns.length + ' labels — send to Claude');
+    });
+    $('clear').addEventListener('click', function () {
+      if (!anns.length || !confirm('Remove all pins on this model?')) return;
+      anns.slice().forEach(function (a) { remove(a.key); });
+    });
+
+    var tt;
+    function toast(msg) { var el = $('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(tt); tt = setTimeout(function () { el.classList.remove('show'); }, 2200); }
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#185FA5">
+  <title>BioVerseAR — Profile</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="BioVerseAR">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app has-nav pf">
+    <header class="pf-head">
+      <h1 class="page-h">Profile</h1>
+      <p class="pf-sub">Your learning journey continues!</p>
+    </header>
+
+    <!-- Hero -->
+    <section class="pf-hero">
+      <img class="pf-hero-bg" src="assets/splash/tarsier-hero-scene.webp" alt="" aria-hidden="true">
+      <span class="pf-hero-bubble">Keep exploring great things! 🌿</span>
+      <div class="pf-hero-card">
+        <div class="pf-hero-info">
+          <div class="pf-hero-name" id="p-alias">student</div>
+          <div class="pf-hero-class" id="p-class-line">Explorer</div>
+          <span class="pf-hero-pill" id="pf-pill" hidden></span>
+        </div>
+        <a class="pf-edit" href="#pf-explorer" aria-label="Edit your explorer" title="Edit your explorer">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 20h4l10-10-4-4L4 16v4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M13.5 6.5l4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <div class="pf-stats">
+      <a class="pf-stat" href="badges.html">
+        <span class="pf-stat-ic bdg"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="5.2" stroke="currentColor" stroke-width="1.7"/><path d="M9 13.5L7.5 21l4.5-2.6L16.5 21 15 13.5" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>
+        <b id="s-badges">0</b><small>Badges</small>
+        <svg class="pf-stat-go" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a class="pf-stat" href="progress.html">
+        <span class="pf-stat-ic pts"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.5 6 .7-4.4 4.1 1.2 5.9L12 16.9 6.6 19.2l1.2-5.9L3.4 9.2l6-.7z" fill="currentColor"/></svg></span>
+        <b id="s-points">0</b><small>Points</small>
+        <svg class="pf-stat-go" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a class="pf-stat" href="progress.html">
+        <span class="pf-stat-ic done"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5A2.5 2.5 0 016.5 3H11v16H6.5A2.5 2.5 0 004 20.5V5.5zM20 5.5A2.5 2.5 0 0017.5 3H13v16h4.5a2.5 2.5 0 012.5 1.5V5.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+        <b id="s-done">0</b><small>Completed</small>
+        <svg class="pf-stat-go" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+
+    <!-- Competition (rendered by JS: competing vs join) -->
+    <section class="pf-comp" id="pf-comp"></section>
+
+    <!-- Your Explorer -->
+    <section id="pf-explorer">
+      <h2 class="section-title">Your Explorer</h2>
+      <div class="acct-card pf-exp-card">
+        <div class="pf-exp-top">
+          <div class="pf-exp-face" id="pf-exp-face" aria-hidden="true"></div>
+          <div class="pf-exp-meta">
+            <div class="pf-exp-name" id="pf-exp-name">Tarsy</div>
+            <div class="pf-exp-tag" id="pf-exp-tag">Tiny eyes, giant curiosity.</div>
+            <div class="pf-exp-traits" id="pf-exp-traits"></div>
+          </div>
+        </div>
+        <div class="av-strip" id="p-avatars"></div>
+        <div class="form-msg" id="av-msg"></div>
+        <button class="btn" type="button" id="av-save">Save explorer</button>
+      </div>
+    </section>
+
+    <!-- Account information -->
+    <div class="acct-head">
+      <h2 class="section-title">Account information</h2>
+      <button class="pf-edit-btn" id="info-edit" type="button" aria-expanded="false">Edit</button>
+    </div>
+    <div class="acct-card pf-rows" id="info-view">
+      <div class="pf-row">
+        <span class="pf-row-ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M5 20c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        <span class="pf-row-k">Name</span><span class="pf-row-v" id="a-name">—</span>
+      </div>
+      <div class="pf-row">
+        <span class="pf-row-ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M16 12v1.5a2.5 2.5 0 005 0V12a9 9 0 10-3.5 7.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        <span class="pf-row-k">Username</span><span class="pf-row-v" id="a-user">—</span>
+      </div>
+      <div class="pf-row">
+        <span class="pf-row-ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="9" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 19c0-2.8 2.5-4.6 5.5-4.6s5.5 1.8 5.5 4.6M16 5a3 3 0 010 6M17.5 14.6c2.3.4 4 2 4 4.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        <span class="pf-row-k">Class</span><span class="pf-row-v" id="a-class">—</span>
+      </div>
+    </div>
+    <form class="acct-card pf-info-edit" id="info-form" novalidate hidden>
+      <div class="field">
+        <label for="e-name">Name</label>
+        <input id="e-name" type="text" autocomplete="name" maxlength="60" placeholder="Your full name">
+      </div>
+      <div class="field">
+        <label for="e-user">Username</label>
+        <input id="e-user" type="text" disabled>
+        <small class="field-hint">Your username is your login — it can’t be changed.</small>
+      </div>
+      <div class="field">
+        <label>Class</label>
+        <input id="e-class" type="text" disabled>
+        <small class="field-hint">Join or leave a class from the Competition card above.</small>
+      </div>
+      <div class="form-msg" id="info-msg"></div>
+      <div class="pf-info-actions">
+        <button class="btn" type="submit">Save changes</button>
+        <button class="btn secondary" id="info-cancel" type="button">Cancel</button>
+      </div>
+    </form>
+    <p class="acct-note">Your name is private — only your teacher can see it. Classmates see only your username.</p>
+
+    <!-- Account security -->
+    <h2 class="section-title">Account security</h2>
+    <button class="acct-card pf-action" id="pw-toggle" type="button" aria-expanded="false">
+      <span class="pf-row-ic key"><svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="15" r="4.2" stroke="currentColor" stroke-width="1.6"/><path d="M11 13l8-8M17 5l2 2M15 7l2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="pf-action-text"><b>Change password</b><small>Keep your account safe</small></span>
+      <svg class="pf-row-go" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <form id="pw-form" class="acct-card pf-pw" novalidate hidden>
+      <div class="field"><label for="pw-new">New password</label><input id="pw-new" type="password" autocomplete="new-password" maxlength="64" placeholder="6+ chars · 1 uppercase · 1 number · 1 symbol"></div>
+      <div class="field"><label for="pw-confirm">Confirm new password</label><input id="pw-confirm" type="password" autocomplete="new-password" maxlength="64" placeholder="type it again"></div>
+      <div class="form-msg" id="pw-msg"></div>
+      <button class="btn" type="submit">Update password</button>
+    </form>
+
+    <button class="btn danger-outline" id="signout" type="button">Log out</button>
+
+    <p class="pf-quote">“Same curious mind.<br>A brighter tomorrow.” 🌿</p>
+    <p class="pf-legal"><a href="terms.html">Terms &amp; Conditions · Privacy Policy</a></p>
+
+    <div class="spacer-grow"></div>
+  </div>
+
+  <nav id="bottomnav"></nav>
+
+  <script src="assets/vendor/supabase.min.js"></script>
+  <script src="topics.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    var profile = BV.requireAuth(); if (!profile) return;
+    var $ = function (id) { return document.getElementById(id); };
+
+    // ---- Hero + account ----
+    $('p-alias').textContent = profile.alias;
+    $('a-name').textContent = profile.fullName || '—';
+    $('a-user').textContent = profile.alias;
+
+    var stats = BV.overallStats();
+    $('s-badges').textContent = stats.badges;
+    $('s-points').textContent = stats.points;
+    $('s-done').textContent = stats.done;
+
+    function setClassEverywhere(name) {
+      $('p-class-line').textContent = name ? ('Class ' + name) : 'Explorer';
+      $('a-class').textContent = name || '—';
+    }
+    setClassEverywhere(BV.classDisplay());
+
+    // ---- Explorer (avatar) card + hero pill ----
+    var pAvatar = profile.avatar || BV.defaultAvatar();
+    function paintExplorer(id) {
+      $('pf-exp-face').innerHTML = BV.avatarSvg(id);
+      $('pf-exp-name').textContent = BV.avatarName(id);
+      $('pf-exp-tag').textContent = BV.avatarTag(id);
+      $('pf-exp-traits').innerHTML = BV.avatarTraits(id).map(function (t) {
+        return '<span class="pf-trait">' + BV.escape(t) + '</span>';
+      }).join('');
+    }
+    function paintPill(id) {
+      var tr = BV.avatarTraits(id)[0];
+      var pill = $('pf-pill');
+      if (tr) { pill.hidden = false; pill.innerHTML = '🌿 ' + BV.escape(tr) + ' Explorer'; }
+      else pill.hidden = true;
+    }
+    paintExplorer(pAvatar); paintPill(pAvatar);
+
+    (function buildAvatars() {
+      var host = $('p-avatars');
+      BV.avatars().forEach(function (a) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'av-opt' + (a.id === pAvatar ? ' on' : '');
+        b.setAttribute('data-id', a.id);
+        b.setAttribute('aria-label', 'Choose ' + a.name);
+        b.innerHTML = '<span class="av-face">' + a.svg + '</span><span class="av-nm">' + a.name + '</span>';
+        host.appendChild(b);
+      });
+      host.addEventListener('click', function (e) {
+        var b = e.target.closest('.av-opt'); if (!b) return;
+        pAvatar = b.getAttribute('data-id');
+        [].forEach.call(host.children, function (c) { c.classList.toggle('on', c === b); });
+        paintExplorer(pAvatar); paintPill(pAvatar);   // live preview
+      });
+    })();
+
+    var avMsg = $('av-msg');
+    $('av-save').addEventListener('click', function () {
+      var btn = this; btn.disabled = true; var t = btn.textContent; btn.textContent = 'Saving…';
+      BV.setAvatar(pAvatar).then(function () {
+        btn.disabled = false; btn.textContent = t;
+        avMsg.className = 'form-msg show ok'; avMsg.textContent = 'Explorer saved.';
+      });
+    });
+
+    // ---- Competition card (competing vs join) ----
+    var PODIUM = '<svg class="pf-podium" viewBox="0 0 96 74" fill="none" aria-hidden="true">' +
+      '<path d="M48 4l2.3 4.7 5.2.8-3.8 3.7.9 5.2L48 15.7l-4.6 2.5.9-5.2-3.8-3.7 5.2-.8z" fill="#FFD86B"/>' +
+      '<rect x="37" y="30" width="22" height="44" rx="3" fill="#FFC94D"/>' +
+      '<rect x="11" y="46" width="22" height="28" rx="3" fill="#CBD8E6"/>' +
+      '<rect x="63" y="52" width="22" height="22" rx="3" fill="#E7B07A"/>' +
+      '<text x="48" y="57" font-size="14" font-weight="800" fill="#8a5e00" text-anchor="middle">1</text>' +
+      '<text x="22" y="64" font-size="12" font-weight="800" fill="#4a5b6b" text-anchor="middle">2</text>' +
+      '<text x="74" y="66" font-size="12" font-weight="800" fill="#7a4a1e" text-anchor="middle">3</text></svg>';
+
+    function renderComp() {
+      var code = (BV.getProfile() || {}).classCode || '';
+      var host = $('pf-comp');
+      if (code) {
+        host.className = 'pf-comp competing';
+        host.innerHTML =
+          '<div class="pf-comp-top"><span class="pf-comp-title">🏆 Class Competition</span>' +
+            '<a class="pf-comp-link" href="leaderboard.html">View Leaderboard →</a></div>' +
+          '<div class="pf-comp-body"><div class="pf-comp-main">' +
+            '<div class="pf-comp-big">Class ' + BV.escape(BV.classDisplay()) + '</div>' +
+            '<p class="pf-comp-desc">You’re competing with your classmates. Keep learning to climb the leaderboard!</p>' +
+            '<button class="pf-comp-leave" id="comp-leave" type="button">Leave competition</button>' +
+          '</div>' + PODIUM + '</div>';
+        $('comp-leave').addEventListener('click', function () {
+          if (!confirm('Leave the competition? You’ll go back to exploring solo.')) return;
+          var b = this; b.disabled = true; b.textContent = 'Leaving…';
+          BV.joinClass('').then(function (r) {
+            if (r.ok) { setClassEverywhere(''); renderComp(); }
+            else { b.disabled = false; b.textContent = 'Leave competition'; alert(r.error); }
+          });
+        });
+      } else {
+        host.className = 'pf-comp joinable';
+        host.innerHTML =
+          '<div class="pf-comp-top"><span class="pf-comp-title">🏁 Join a Competition</span></div>' +
+          '<p class="pf-comp-desc">Enter your class code to compete with classmates on the leaderboard. No code? Keep exploring solo — you can join any time.</p>' +
+          '<div class="pf-comp-join"><input class="pf-comp-input" id="comp-code" type="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="40" placeholder="e.g. 7-RIZAL">' +
+            '<button class="pf-comp-btn" id="comp-join" type="button">Join</button></div>' +
+          '<div class="form-msg" id="comp-msg"></div>';
+        var msg = $('comp-msg');
+        $('comp-code').addEventListener('input', function () { msg.className = 'form-msg'; });
+        $('comp-join').addEventListener('click', function () {
+          var val = $('comp-code').value.trim().replace(/\s+/g, ' ');
+          if (!val) { msg.className = 'form-msg show err'; msg.textContent = 'Enter a class code first.'; return; }
+          var b = this; b.disabled = true; b.textContent = '…';
+          BV.joinClass(val).then(function (r) {
+            if (r.ok) { setClassEverywhere(r.className || val); renderComp(); }
+            else { b.disabled = false; b.textContent = 'Join'; msg.className = 'form-msg show err'; msg.textContent = r.error; }
+          });
+        });
+      }
+    }
+    renderComp();
+
+    // ---- Edit account information (Name) ----
+    var infoEdit = $('info-edit'), infoView = $('info-view'), infoForm = $('info-form'), infoMsg = $('info-msg');
+    function openInfo(open) {
+      infoForm.hidden = !open;
+      infoView.hidden = open;
+      infoEdit.textContent = open ? 'Close' : 'Edit';
+      infoEdit.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open) {
+        var p = BV.getProfile() || {};
+        $('e-name').value = p.fullName || '';
+        $('e-user').value = p.alias || '';
+        $('e-class').value = BV.classDisplay() || 'Explorer';
+        infoMsg.className = 'form-msg';
+        $('e-name').focus();
+      }
+    }
+    infoEdit.addEventListener('click', function () { openInfo(infoForm.hidden); });
+    $('info-cancel').addEventListener('click', function () { openInfo(false); });
+    $('e-name').addEventListener('input', function () { infoMsg.className = 'form-msg'; });
+    infoForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var btn = this.querySelector('button[type="submit"]'); btn.disabled = true; var t = btn.textContent; btn.textContent = 'Saving…';
+      BV.updateName($('e-name').value).then(function (r) {
+        btn.disabled = false; btn.textContent = t;
+        if (r.ok) {
+          $('a-name').textContent = r.fullName || '—';
+          infoMsg.className = 'form-msg show ok'; infoMsg.textContent = 'Saved.';
+          setTimeout(function () { openInfo(false); }, 700);
+        } else { infoMsg.className = 'form-msg show err'; infoMsg.textContent = r.error; }
+      });
+    });
+
+    // ---- Change password (collapsible) ----
+    var pwToggle = $('pw-toggle'), pwForm = $('pw-form');
+    pwToggle.addEventListener('click', function () {
+      var open = pwForm.hidden;
+      pwForm.hidden = !open;
+      this.setAttribute('aria-expanded', open ? 'true' : 'false');
+      this.classList.toggle('open', open);
+      if (open) $('pw-new').focus();
+    });
+    var msg = $('pw-msg');
+    function showMsg(kind, text) { msg.className = 'form-msg show ' + kind; msg.textContent = text; }
+    pwForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var np = $('pw-new').value, cf = $('pw-confirm').value;
+      var perr = np.length < 6 ? 'Password must be at least 6 characters.'
+        : !/[A-Z]/.test(np) ? 'Add at least 1 uppercase letter.'
+        : !/[0-9]/.test(np) ? 'Add at least 1 number.'
+        : !/[^A-Za-z0-9]/.test(np) ? 'Add at least 1 special character (e.g. ! @ # ?).' : null;
+      if (perr) { showMsg('err', perr); return; }
+      if (np !== cf) { showMsg('err', 'The two passwords do not match.'); return; }
+      var btn = this.querySelector('button[type="submit"]'); btn.disabled = true; var t = btn.textContent; btn.textContent = 'Updating…';
+      BV.changePassword(np).then(function (r) {
+        btn.disabled = false; btn.textContent = t;
+        if (r.ok) { showMsg('ok', 'Password updated.'); $('pw-new').value = ''; $('pw-confirm').value = ''; }
+        else { showMsg('err', r.error); }
+      });
+    });
+    ['pw-new', 'pw-confirm'].forEach(function (id) { $(id).addEventListener('input', function () { msg.className = 'form-msg'; }); });
+
+    $('signout').addEventListener('click', function () {
+      if (confirm('Log out on this device?')) BV.signOut();
+    });
+
+    BV.renderNav('profile');
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#185FA5">
+  <title>BioVerseAR — Terms & Privacy</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="BioVerseAR">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <div class="ar-head">
+      <a class="iconbtn" id="back" href="index.html" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <div class="title">Terms &amp; Privacy</div>
+    </div>
+
+    <div class="legal">
+      <h1 class="page-h">Terms &amp; Conditions</h1>
+      <p class="legal-updated">Last updated: September 2026</p>
+      <p>BioVerseAR is a gamified, markerless-AR science learning and assessment app made as a
+        capstone project for Liceo de San Pablo. By creating an account or using the app, you
+        (and, for a student, your parent or guardian on your behalf) agree to these Terms.</p>
+
+      <h2 class="section-title">1. Purpose</h2>
+      <p>BioVerseAR is an educational tool for Grade&nbsp;7 science. It lets students view 3D
+        models in augmented reality, take quizzes, earn badges, and — optionally — compete on a
+        class leaderboard. It is intended for use within your school's learning program.</p>
+
+      <h2 class="section-title">2. Who can use it</h2>
+      <p>It is for students and teachers of the school. Students under 18 use it as part of school
+        activities under a teacher's supervision, with their parent's or guardian's permission.</p>
+
+      <h2 class="section-title">3. Your account</h2>
+      <p>Students sign in with a <b>username</b> and <b>password</b> — no email is required. You
+        choose a cartoon <b>explorer avatar</b>, not a real photo. Keep your password private and
+        do not share your account. You are responsible for activity under your account. If you
+        forget your password, your teacher can reset it.</p>
+
+      <h2 class="section-title">4. Acceptable use</h2>
+      <p>Use BioVerseAR for learning. Please do <b>not</b>: cheat or help others cheat on quizzes;
+        try to access another person's account or data; attempt to hack, overload, copy, or disrupt
+        the app; or upload harmful or inappropriate content. Misuse may lead to your account being
+        removed by your teacher.</p>
+
+      <h2 class="section-title">5. Content &amp; credits</h2>
+      <p>Quiz questions and lessons are for educational use. The 3D models are used under the
+        <b>Creative Commons Attribution (CC&nbsp;BY&nbsp;4.0)</b> license and their creators are
+        credited inside each AR view.</p>
+
+      <h2 class="section-title">6. Availability &amp; disclaimer</h2>
+      <p>BioVerseAR is a student capstone project and is provided <b>"as is,"</b> without warranty.
+        It may occasionally be unavailable or contain errors. It is a study aid and does not replace
+        your teacher, textbooks, or official assessments.</p>
+
+      <h2 class="section-title">7. Changes</h2>
+      <p>These Terms may be updated as the app improves. Continued use after an update means you
+        accept the new Terms.</p>
+
+      <h1 class="page-h" style="margin-top:28px">Privacy Policy</h1>
+
+      <h2 class="section-title">What we collect</h2>
+      <ul class="legal-list">
+        <li><b>Username</b> — shown to classmates on the leaderboard.</li>
+        <li><b>Full name</b> — collected so your teacher can identify you in their class roster. It
+          is <b>private</b>: only your own teacher can see it. Classmates never see it.</li>
+        <li><b>Explorer avatar</b> — a cartoon character you pick. No real photo is ever collected.</li>
+        <li><b>Class code</b> — if you join a competition, so you appear on your class board.</li>
+        <li><b>Quiz results &amp; progress</b> — your scores, badges, and answer times.</li>
+      </ul>
+      <p>We do <b>not</b> collect your email, phone number, real-world location, or any photos.</p>
+
+      <h2 class="section-title">How we use it</h2>
+      <p>Only to run the app: to log you in, save your progress, show class leaderboards, and let
+        your teacher see how their class is doing. We do <b>not</b> show ads and we never sell your
+        information.</p>
+
+      <h2 class="section-title">Who can see your data</h2>
+      <ul class="legal-list">
+        <li><b>Classmates</b> — only your username, avatar, and score.</li>
+        <li><b>Your teacher</b> — your full name and scores, for their own class only.</li>
+        <li><b>No one else</b> — no other teacher or student can see your information.</li>
+      </ul>
+
+      <h2 class="section-title">How it's protected</h2>
+      <p>Data is stored securely on Supabase with access rules so a student can only read their own
+        data and a teacher can only read their own classes. Passwords are stored encrypted, never in
+        plain text.</p>
+
+      <h2 class="section-title">Your choices</h2>
+      <p>You can change your avatar or password anytime in your Profile, and leave a competition to
+        stop appearing on a leaderboard. A parent, guardian, or the student can ask the teacher or
+        school to reset a password or remove the student's account and data.</p>
+
+      <h2 class="section-title">Contact</h2>
+      <p>For questions about these Terms or your data, please contact your teacher or the school.</p>
+
+      <div class="spacer-grow"></div>
+    </div>
+  </div>
+
+  <script>
+    // "Back" returns to wherever the user came from (sign-up or profile) when possible.
+    (function () {
+      var b = document.getElementById('back');
+      if (document.referrer && history.length > 1) {
+        b.addEventListener('click', function (e) { e.preventDefault(); history.back(); });
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#185FA5">
+  <title>BioVerseAR — Review</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="BioVerseAR">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <div class="ar-head">
+      <a class="iconbtn" id="back" href="dashboard.html" aria-label="Back to topic">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <div class="title" id="rv-title">Review</div>
+    </div>
+
+    <div class="rv-summary" id="rv-summary"></div>
+
+    <div class="rv-filter" id="rv-filter" hidden>
+      <button class="rv-chip on" data-f="all" type="button">All</button>
+      <button class="rv-chip" data-f="wrong" type="button">Incorrect</button>
+      <button class="rv-chip" data-f="flag" type="button">Flagged</button>
+    </div>
+
+    <div class="rv-list" id="rv-list"></div>
+
+    <a class="btn secondary" id="retake" href="#" style="margin-top:6px">Retake quiz</a>
+    <div class="spacer-grow"></div>
+  </div>
+
+  <script src="topics.js"></script>
+  <script src="questions.js"></script>
+  <script src="app.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    var profile = BV.requireAuth(); if (!profile) return;
+    var $ = function (id) { return document.getElementById(id); };
+
+    var params = new URLSearchParams(location.search);
+    var t = BV.topic(params.get('topic'));
+    var dParam = params.get('diff');
+    var diff = (dParam === 'medium' || dParam === 'hard') ? dParam : 'easy';
+    var quiz = t && window.QUIZZES && window.QUIZZES[t.id];
+    var pool = quiz && quiz[diff];
+    // Prefer the just-finished attempt (session snapshot); fall back to the saved best.
+    var attempt = t ? (BV.getReview(t.id, diff) || BV.getAttempts(t.id)[diff]) : null;
+    if (!t || !pool || !attempt || !attempt.answers) { location.replace('dashboard.html'); return; }
+
+    document.title = 'BioVerseAR — Review';
+    $('rv-title').textContent = t.name + ' · review';
+    $('back').href = 'topic.html?topic=' + encodeURIComponent(t.id);
+    $('retake').href = 'quiz.html?topic=' + encodeURIComponent(t.id) + '&diff=' + diff;
+
+    var byId = {}; pool.forEach(function (q) { byId[q.id] = q; });
+    var flagged = {}; (attempt.flagged || []).forEach(function (id) { flagged[id] = true; });
+    var nFlag = (attempt.flagged || []).length;
+    var diffLabel = diff.charAt(0).toUpperCase() + diff.slice(1);
+
+    $('rv-summary').innerHTML =
+      '<div class="rv-sum-top"><span class="rv-mode">' + diffLabel + '</span>' +
+        '<span class="rv-score">' + attempt.score + ' / ' + attempt.max + ' pts</span></div>' +
+      '<div class="rv-sum-sub">' + attempt.correct + ' of ' + attempt.total + ' correct' +
+        (nFlag ? ' · ' + nFlag + ' flagged' : '') + '</div>';
+
+    var FLAG = '<svg viewBox="0 0 24 24" fill="none"><path d="M6 3v18M6 4h11l-2 3.5L17 11H6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    var list = $('rv-list');
+
+    attempt.answers.forEach(function (ans, i) {
+      var q = byId[ans.qId]; if (!q) return;
+      var isFlag = !!flagged[ans.qId];
+      var opts = q.options.map(function (opt, oi) {
+        var cls = 'rv-opt';
+        var tag = '';
+        if (oi === q.correct) { cls += ' correct'; tag = '<span class="rv-tag ok">✓</span>'; }
+        else if (oi === ans.chosen) { cls += ' wrong'; tag = '<span class="rv-tag no">✗</span>'; }
+        return '<div class="' + cls + '"><span class="rv-letter">' + 'ABCD'[oi] + '</span><span class="rv-opt-text">' + BV.escape(opt) + '</span>' + tag + '</div>';
+      }).join('');
+      var expl = q.explanation || (window.QUIZ_EXPLANATIONS && window.QUIZ_EXPLANATIONS[q.id]) || '';
+      var item = document.createElement('div');
+      item.className = 'rv-item';
+      item.setAttribute('data-correct', ans.correct ? '1' : '0');
+      item.setAttribute('data-flag', isFlag ? '1' : '0');
+      item.innerHTML =
+        '<div class="rv-q-head"><span class="rv-num ' + (ans.correct ? 'ok' : 'no') + '">' + (i + 1) + '</span>' +
+          '<span class="rv-q-text">' + BV.escape(q.q) + '</span>' +
+          (isFlag ? '<span class="rv-flag" title="Flagged">' + FLAG + '</span>' : '') + '</div>' +
+        '<div class="rv-opts">' + opts + '</div>' +
+        (expl ? '<div class="rv-expl"><strong>Why:</strong> ' + BV.escape(expl) + '</div>' : '');
+      list.appendChild(item);
+    });
+
+    // filter chips (only show if there is something to filter)
+    if (attempt.correct < attempt.total || nFlag) {
+      $('rv-filter').hidden = false;
+      $('rv-filter').addEventListener('click', function (e) {
+        var b = e.target.closest('.rv-chip'); if (!b) return;
+        var f = b.getAttribute('data-f');
+        [].forEach.call(this.children, function (c) { c.classList.toggle('on', c === b); });
+        [].forEach.call(list.children, function (it) {
+          var show = f === 'all' || (f === 'wrong' && it.getAttribute('data-correct') === '0') || (f === 'flag' && it.getAttribute('data-flag') === '1');
+          it.style.display = show ? '' : 'none';
+        });
+      });
+    }
+  })();
+  </script>
+</body>
+</html>

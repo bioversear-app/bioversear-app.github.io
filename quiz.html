@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#185FA5">
+  <title>BioVerseAR — Quiz</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="BioVerseAR">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app quiz-app">
+    <div class="ar-head">
+      <a class="iconbtn" id="exit" href="#" aria-label="Exit quiz">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <div class="title" id="quiz-title">Quiz</div>
+      <div style="flex:1"></div>
+      <div class="score-chip" id="score-chip" hidden>0 pts</div>
+    </div>
+
+    <!-- START -->
+    <section id="start" class="card quiz-card">
+      <div class="quiz-mode" id="start-mode">Pre-test</div>
+      <h1 class="quiz-h" id="start-topic">Topic</h1>
+      <p class="quiz-p" id="start-desc">Multiple choice. No penalty for wrong answers.</p>
+      <button class="btn" id="start-btn" type="button">Start</button>
+    </section>
+
+    <!-- QUESTION -->
+    <section id="game" hidden>
+      <div class="q-progress"><div class="q-progress-bar" id="q-bar"></div></div>
+      <div class="q-meta">
+        <span id="q-count">Question 1 of 5</span>
+        <div class="q-meta-right">
+          <span class="q-diff" id="q-diff">Easy · 5 pts</span>
+          <button class="q-flag" id="q-flag" type="button" aria-pressed="false" title="Flag this question for review">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6 3v18M6 4h11l-2 3.5L17 11H6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="q-text" id="q-text">?</div>
+      <div class="q-options" id="q-options"></div>
+    </section>
+
+    <!-- RESULT -->
+    <section id="result" class="card quiz-card" hidden>
+      <img id="result-mascot" class="fx-mascot-lg" alt="" aria-hidden="true">
+      <div class="result-ring" id="result-ring"><span id="result-score">0</span><small>pts</small></div>
+      <h1 class="quiz-h" id="result-h">Nice work!</h1>
+      <p class="quiz-p" id="result-sub">You answered 0 of 0 correctly.</p>
+      <div class="badge-earned" id="badge-earned" hidden></div>
+      <button class="btn" id="done-btn" type="button">Back to topic</button>
+      <a class="btn secondary" id="review-btn" href="#">Review answers</a>
+      <button class="btn secondary" id="retake-btn" type="button">Retake</button>
+    </section>
+  </div>
+
+  <!-- Celebration FX (Duolingo-style): confetti + slide-up feedback banner -->
+  <canvas class="fx-confetti" id="fx-cv" aria-hidden="true"></canvas>
+  <div class="fx-banner" id="fx-banner" role="status" aria-live="polite" style="display:none">
+    <div class="fx-row">
+      <img class="fx-mascot" id="fx-mascot" alt="" aria-hidden="true">
+      <div class="fx-msg"><div class="fx-title" id="fx-title"></div><div class="fx-sub" id="fx-sub"></div></div>
+    </div>
+    <button class="fx-explain-toggle" id="fx-explain-toggle" type="button" hidden>See explanation<span class="chev" aria-hidden="true">⌄</span></button>
+    <div class="fx-explain" id="fx-explain" hidden></div>
+    <button class="btn" id="next-btn" type="button">Continue</button>
+  </div>
+
+  <script src="assets/vendor/supabase.min.js"></script>
+  <script src="topics.js"></script>
+  <script src="questions.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <script src="assets/vendor/gsap.min.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    var profile = BV.requireAuth(); if (!profile) return;
+
+    var params = new URLSearchParams(location.search);
+    var t = BV.topic(params.get('topic'));
+    var dParam = params.get('diff');
+    var diff = (dParam === 'medium' || dParam === 'hard') ? dParam : 'easy';
+    var quiz = t && window.QUIZZES && window.QUIZZES[t.id];
+    var pool = quiz && quiz[diff];
+    if (!t || !t.ready || !pool || !pool.length) { location.replace('dashboard.html'); return; }
+
+    var P = window.QUIZ_POINTS, PTS = P[diff] || 0, QUIZ_N = 10;
+    // Each attempt draws a fresh random 10 from the 50-question pool (replayable).
+    function sample(arr, n) {
+      var a = arr.slice();
+      for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = a[i]; a[i] = a[j]; a[j] = tmp; }
+      return a.slice(0, Math.min(n, a.length));
+    }
+    var Q = sample(pool, QUIZ_N);
+    var CF = window.QUIZ_CORRECT_FEEDBACK || ['Correct!'];
+    var WF = window.QUIZ_WRONG_FEEDBACK || ['Not quite.'];
+    function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+    function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    var idx = 0, score = 0, correctCount = 0, answers = [], shownAt = 0, streak = 0, maxStreak = 0, flagged = {};
+    var diffLabel = cap(diff);
+
+    var $ = function (id) { return document.getElementById(id); };
+    var GS = (typeof gsap !== 'undefined');
+    var REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var DUO = ['#58CC02', '#1CB0F6', '#FFC800', '#FF4B4B'];
+
+    document.getElementById('exit').href = 'topic.html?topic=' + encodeURIComponent(t.id);
+    $('quiz-title').textContent = t.name;
+    $('start-mode').textContent = diffLabel + ' · ' + PTS + ' pts each';
+    $('start-topic').textContent = t.name;
+    $('start-desc').textContent = Q.length + ' questions · drawn from a bank of ' + pool.length + ' · no penalty for wrong answers.';
+
+    /* ---------- celebration effects ---------- */
+    var cv = $('fx-cv'), ctx = cv.getContext('2d'), parts = [], raf = null, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    function fitCv() { cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+    addEventListener('resize', fitCv); fitCv();
+    function confettiTick() {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      parts = parts.filter(function (p) { return p.life > 0; });
+      parts.forEach(function (p) {
+        p.vy += 0.16; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life--;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+        ctx.globalAlpha = Math.max(0, Math.min(1, p.life / 22));
+        ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.55); ctx.restore();
+      });
+      raf = parts.length ? requestAnimationFrame(confettiTick) : null;
+    }
+    function confetti(n, power, originY) {
+      if (REDUCE) return;
+      var cx = innerWidth / 2, cy = innerHeight * (originY || 0.32);
+      for (var i = 0; i < n; i++) {
+        var a = Math.random() * Math.PI * 2, sp = power * (0.35 + Math.random());
+        parts.push({ x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - power * 0.55,
+          vr: (Math.random() - 0.5) * 0.4, rot: Math.random() * 6, s: 5 + Math.random() * 6,
+          c: DUO[i % DUO.length], life: 55 + Math.random() * 30 });
+      }
+      if (!raf) raf = requestAnimationFrame(confettiTick);
+    }
+    function clearConfetti() { parts = []; if (raf) { cancelAnimationFrame(raf); raf = null; } ctx.clearRect(0, 0, innerWidth, innerHeight); }
+    function buzz(p) { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} }
+
+    // Banner slide is CSS-driven (a class toggle) so the Continue button inside it is
+    // always reachable even if the animation engine ever fails to run.
+    function showBanner(kind, icon, title, sub, lastQ) {
+      var b = $('fx-banner');
+      b.className = 'fx-banner ' + kind;
+      $('fx-mascot').src = 'assets/mascot/tarsier-' + (icon === 'check' ? 'correct' : 'wrong') + '.png';
+      $('fx-title').textContent = title;
+      $('fx-sub').textContent = sub || '';
+      $('next-btn').textContent = lastQ ? 'See results' : 'Continue';
+      b.style.display = 'block';
+      requestAnimationFrame(function () { b.classList.add('up'); });
+    }
+    function hideBannerNow() {
+      var b = $('fx-banner');
+      b.classList.remove('up'); b.style.display = 'none';
+      $('fx-explain').hidden = true; $('fx-explain-toggle').classList.remove('open');
+    }
+    // Optional per-question explanation: from the question itself or the shared map.
+    function explanationFor(q) {
+      return q.explanation || (window.QUIZ_EXPLANATIONS && window.QUIZ_EXPLANATIONS[q.id]) || '';
+    }
+    function setupExplain(q) {
+      var tog = $('fx-explain-toggle'), box = $('fx-explain');
+      tog.classList.remove('open'); box.hidden = true;
+      var e = explanationFor(q);
+      if (e) { box.textContent = e; tog.hidden = false; } else { tog.hidden = true; }
+    }
+
+    function popCorrect(el) {
+      el.classList.add('correct');
+      if (GS && !REDUCE) gsap.fromTo(el, { scale: 1 }, { scale: 1.05, duration: 0.16, ease: 'power2.out', yoyo: true, repeat: 1, clearProps: 'transform' });
+    }
+    function shakeWrong(el) {
+      el.classList.add('wrong');
+      if (GS && !REDUCE) gsap.fromTo(el, { x: 0 }, { keyframes: [{ x: -7 }, { x: 7 }, { x: -5 }, { x: 5 }, { x: 0 }], duration: 0.45, ease: 'power2.out', clearProps: 'transform' });
+    }
+    function bumpScore() {
+      if (GS && !REDUCE) gsap.fromTo($('score-chip'), { scale: 1 }, { scale: 1.18, duration: 0.16, ease: 'back.out(3)', yoyo: true, repeat: 1, clearProps: 'transform' });
+    }
+    function countUp(el, to, suffix) {
+      suffix = suffix || '';
+      if (!GS || REDUCE) { el.textContent = to + suffix; return; }
+      var o = { v: parseInt(el.textContent, 10) || 0 };
+      gsap.to(o, { v: to, duration: 0.6, ease: 'power1.out', onUpdate: function () { el.textContent = Math.round(o.v) + suffix; } });
+    }
+
+    /* ---------- quiz flow ---------- */
+    $('start-btn').addEventListener('click', function () {
+      $('start').hidden = true; $('game').hidden = false; $('score-chip').hidden = false;
+      renderQuestion();
+    });
+
+    function renderQuestion() {
+      hideBannerNow(); clearConfetti();
+      var q = Q[idx];
+      $('q-bar').style.width = ((idx) / Q.length * 100) + '%';
+      $('q-count').textContent = 'Question ' + (idx + 1) + ' of ' + Q.length;
+      $('q-diff').textContent = diffLabel + ' · ' + PTS + ' pts';
+      var fq = $('q-flag'), isF = !!flagged[q.id];
+      fq.classList.toggle('on', isF); fq.setAttribute('aria-pressed', isF ? 'true' : 'false');
+      $('q-text').textContent = q.q;
+
+      var host = $('q-options'); host.innerHTML = '';
+      q.options.forEach(function (opt, i) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'q-opt';
+        b.innerHTML = '<span class="q-letter">' + 'ABCD'[i] + '</span><span>' + BV.escape(opt) + '</span>';
+        b.addEventListener('click', function () { choose(i); });
+        host.appendChild(b);
+      });
+      // y-only (never animates opacity) so an option can never end up invisible
+      if (GS && !REDUCE) gsap.from('#q-options .q-opt', { y: 10, duration: 0.3, stagger: 0.04, ease: 'power2.out' });
+      shownAt = new Date().getTime();
+    }
+
+    function choose(chosen) {
+      var q = Q[idx];
+      var ms = new Date().getTime() - shownAt;
+      var opts = $('q-options').querySelectorAll('.q-opt');
+      opts.forEach(function (b, i) {
+        b.disabled = true;
+        if (i === q.correct) popCorrect(b);
+        if (i === chosen && chosen !== q.correct) shakeWrong(b);
+      });
+      var right = chosen === q.correct;
+      if (right) { score += PTS; correctCount++; }
+      answers.push({ qId: q.id, chosen: chosen, correct: right, ms: ms });
+
+      countUp($('score-chip'), score, ' pts'); bumpScore();
+      var lastQ = (idx === Q.length - 1);
+      setupExplain(q);
+      if (right) {
+        streak++; if (streak > maxStreak) maxStreak = streak;
+        buzz(30); confetti(46, 6.5, 0.34);
+        var sub = '+' + PTS + ' points' + (streak >= 2 ? '   ·   🔥 ' + streak + ' in a row' : '');
+        showBanner('ok', 'check', pick(CF), sub, lastQ);
+      } else {
+        streak = 0;
+        buzz([40, 40, 40]);
+        showBanner('bad', 'cross', pick(WF), 'The correct answer is: ' + q.options[q.correct], lastQ);
+      }
+    }
+
+    $('next-btn').addEventListener('click', function () {
+      idx++;
+      if (idx < Q.length) renderQuestion(); else finish();
+    });
+
+    $('q-flag').addEventListener('click', function () {
+      var q = Q[idx];
+      if (flagged[q.id]) delete flagged[q.id]; else flagged[q.id] = true;
+      var on = !!flagged[q.id];
+      this.classList.toggle('on', on); this.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+
+    $('fx-explain-toggle').addEventListener('click', function () {
+      var box = $('fx-explain');
+      box.hidden = !box.hidden;
+      this.classList.toggle('open', !box.hidden);
+    });
+
+    function finish() {
+      hideBannerNow(); clearConfetti();
+      var maxPts = Q.length * PTS;
+      var passed = maxPts ? (score >= maxPts * 0.6) : false;
+      // Total "thinking time" = sum of per-question answer times. Powers the
+      // leaderboard's speed tie-break (faster wins when scores are equal).
+      var timeMs = answers.reduce(function (s, a) { return s + (a.ms || 0); }, 0);
+      var attempt = { diff: diff, score: score, max: maxPts, correct: correctCount, total: Q.length,
+                      answers: answers, flagged: Object.keys(flagged), at: new Date().toISOString(), time_ms: timeMs };
+      BV.saveAttempt(t.id, diff, attempt);
+      BV.stashReview(t.id, diff, attempt);
+      $('review-btn').href = 'review.html?topic=' + encodeURIComponent(t.id) + '&diff=' + diff;
+
+      // Earn the topic badge by passing (60%+) any difficulty.
+      var newlyEarned = false;
+      if (passed && !BV.hasBadge(t.id)) { BV.awardBadge(t.id); newlyEarned = true; }
+
+      $('game').hidden = true; $('result').hidden = false; $('score-chip').hidden = true;
+      $('result-mascot').src = 'assets/mascot/tarsier-celebrate.png';
+      $('result-h').textContent = passed ? 'Great work!' : 'Quiz complete!';
+      $('result-score').textContent = '0'; countUp($('result-score'), score, '');
+      $('result-sub').textContent = 'You answered ' + correctCount + ' of ' + Q.length + ' correctly (' + score + ' / ' + maxPts + ' pts).' + (maxStreak >= 3 ? '  Best streak: 🔥 ' + maxStreak + '.' : '');
+
+      var badgeShown = false;
+      if (newlyEarned || BV.hasBadge(t.id)) {
+        var be = $('badge-earned'); be.hidden = false; badgeShown = true;
+        be.innerHTML = (newlyEarned ? '🏅 Badge earned: ' : '🏅 Badge: ') + '<strong>' + BV.escape(t.badge) + '</strong>';
+      }
+
+      if (GS && !REDUCE) {
+        gsap.from('#result-mascot', { scale: 0.4, rotation: -8, duration: 0.6, ease: 'back.out(2.2)' });
+        gsap.from('#result-ring', { scale: 0.7, opacity: 0, duration: 0.6, ease: 'back.out(2)' });
+        gsap.from(['#result-h', '#result-sub'], { y: 12, opacity: 0, duration: 0.45, stagger: 0.08, ease: 'power3.out', delay: 0.15 });
+        if (badgeShown) gsap.from('#badge-earned', { scale: 0.6, opacity: 0, duration: 0.6, ease: 'back.out(2)', delay: 0.45 });
+      }
+      confetti(90, 8.5, 0.4);
+      buzz(newlyEarned ? [30, 60, 30] : 30);
+    }
+
+    $('done-btn').addEventListener('click', function () { location.href = 'topic.html?topic=' + encodeURIComponent(t.id); });
+    $('retake-btn').addEventListener('click', function () {
+      idx = 0; score = 0; correctCount = 0; answers = []; streak = 0; maxStreak = 0; flagged = {};
+      Q = sample(pool, QUIZ_N); // fresh random 10 on every retake
+      clearConfetti(); hideBannerNow();
+      $('result').hidden = true; $('game').hidden = false; $('score-chip').hidden = false;
+      $('score-chip').textContent = '0 pts';
+      renderQuestion();
+    });
+  })();
+  </script>
+</body>
+</html>

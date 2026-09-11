@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#185FA5">
+  <title>BioVerseAR — AR view</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="BioVerseAR">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="assets/vendor/model-viewer.min.js"></script>
+  <script>
+    customElements.whenDefined('model-viewer').then(function () {
+      var MV = customElements.get('model-viewer');
+      MV.dracoDecoderLocation   = new URL('assets/vendor/draco/',  document.baseURI).href;
+      MV.ktx2TranscoderLocation = new URL('assets/vendor/basis/',  document.baseURI).href;
+    });
+  </script>
+</head>
+<body>
+  <div class="app">
+    <div class="ar-head">
+      <a class="iconbtn" href="dashboard.html" aria-label="Back to topics">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <div class="title" id="topic-name">Topic</div>
+      <div class="spacer" style="flex:1"></div>
+      <button class="tour-chip ghost" id="labels-btn" type="button" aria-pressed="true" title="Show/hide labels">
+        <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.6" stroke="currentColor" stroke-width="1.7"/></svg>
+        Labels
+      </button>
+      <button class="tour-chip" id="tour-btn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Guided tour
+      </button>
+    </div>
+
+    <div class="stage" id="stage">
+      <model-viewer id="mv" ar ar-modes="webxr scene-viewer quick-look" ar-placement="floor"
+        camera-controls interaction-prompt="none" shadow-intensity="0" exposure="1"
+        autoplay
+        min-camera-orbit="auto auto 0.12m" max-camera-orbit="auto auto 1.6m" alt="3D model">
+        <button slot="ar-button" class="ar-btn">View in AR</button>
+      </model-viewer>
+      <svg class="leaders" id="leaders" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="cards" id="cards"></div>
+    </div>
+
+    <div class="ar-status" id="status" role="status" aria-live="polite">Loading model…</div>
+
+    <div class="toolbar" id="toolbar">
+      <button class="tool" data-act="rotate" type="button">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 018-8 8 8 0 016.9 4M20 5v4h-4M20 12a8 8 0 01-8 8 8 8 0 01-6.9-4M4 19v-4h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Rotate</span>
+      </button>
+      <button class="tool" data-act="pan" type="button">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18M8 7l4-4 4 4M8 17l4 4 4-4M7 8l-4 4 4 4M17 8l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Pan</span>
+      </button>
+      <button class="tool" data-act="zoomin" type="button">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M11 8v6M8 11h6M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Zoom In</span>
+      </button>
+      <button class="tool" data-act="zoomout" type="button">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M8 11h6M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Zoom Out</span>
+      </button>
+      <button class="tool" data-act="reset" type="button">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg>
+        <span>Reset</span>
+      </button>
+      <button class="tool" data-act="playpause" id="pp-btn" type="button" hidden>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M7 5l12 7-12 7V5z" fill="currentColor"/></svg>
+        <span>Play</span>
+      </button>
+    </div>
+
+    <p class="ar-note">Tap a numbered dot or a card to focus that part. Tap <strong>View in AR</strong> to place the cell in your room (labels show here in the 3D view).</p>
+  </div>
+
+  <!-- Full-screen guided tour -->
+  <div class="tour-ov" id="tour-ov" hidden>
+    <div class="tour-ov-top">
+      <div class="tour-step">Step <span id="tour-i">1</span> of <span id="tour-n">1</span></div>
+      <button class="tour-exit" id="tour-exit" type="button">Exit tour</button>
+    </div>
+    <div class="tour-ov-card">
+      <div class="tour-ov-head">
+        <span class="tour-num" id="tour-num">1</span>
+        <span class="tour-ov-title" id="tour-title"></span>
+        <button class="tour-tts" id="tour-tts" type="button" aria-label="Read aloud" hidden><svg viewBox="0 0 24 24" fill="none"><path d="M4 9v6h4l5 4V5L8 9H4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 8.5a4 4 0 010 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+      </div>
+      <div class="tour-ov-body" id="tour-body"></div>
+    </div>
+    <div class="tour-ov-foot">
+      <div class="tour-dots" id="tour-dots" aria-hidden="true"></div>
+      <div class="tour-hint">Tap anywhere to continue</div>
+      <div class="tour-navbtns">
+        <button class="tour-back" id="tour-prev" type="button">Back</button>
+        <button class="tour-nextbtn" id="tour-next" type="button">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="topics.js"></script>
+  <script src="app.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    var profile = BV.requireAuth();
+    if (!profile) return;
+
+    var t = BV.topic(new URLSearchParams(location.search).get('topic'));
+    if (!t || !t.ready || !t.model) { location.replace('dashboard.html'); return; }
+
+    document.title = 'BioVerseAR — ' + t.name;
+    document.getElementById('topic-name').textContent = t.name;
+
+    var mv = document.getElementById('mv');
+    var status = document.getElementById('status');
+    mv.setAttribute('alt', t.name + ' 3D model');
+    if (t.space) mv.classList.add('space'); // galaxy backdrop for space topics
+    if (t.scene) mv.classList.add('scene-' + t.scene); // themed per-topic backdrop
+    mv.src = t.model;
+    // iOS Quick Look drops animations from the auto-generated USDZ; if a topic
+    // provides a hand-made animated .usdz, use it so iPhone placed-AR animates too.
+    if (t.iosSrc) mv.setAttribute('ios-src', t.iosSrc);
+    // ---- Play/Pause for animated models ----
+    // model-viewer hotspots are pinned to fixed 3D points, so they can't follow a
+    // moving mesh. Topics with orbiting/moving parts (no `animate` flag) load PAUSED at
+    // frame 0 so labels sit on the right part; `animate` topics (e.g. the pendulum,
+    // where motion is the point) auto-play. The button lets students watch either way.
+    var ppBtn = document.getElementById('pp-btn');
+    var PP_PLAY  = '<svg viewBox="0 0 24 24" fill="none"><path d="M7 5l12 7-12 7V5z" fill="currentColor"/></svg><span>Play</span>';
+    var PP_PAUSE = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor"/></svg><span>Pause</span>';
+    function hasAnim() { return mv.availableAnimations && mv.availableAnimations.length > 0; }
+    // Track intended state ourselves — mv.paused updates async after play()/pause(),
+    // so reading it back right after toggling is unreliable.
+    var playing = false;
+    function applyPlay(p) {
+      playing = p;
+      try { if (p) mv.play(); else mv.pause(); } catch (e) {}
+      ppBtn.innerHTML = p ? PP_PAUSE : PP_PLAY;
+      ppBtn.classList.toggle('on', p);
+    }
+    function pauseAtStart() { applyPlay(false); try { mv.currentTime = 0; } catch (e) {} }
+
+    // `autoplay` (on the element) initialises the animation mixer — model-viewer 1.6.3
+    // won't expose availableAnimations without it. So it starts playing, then for
+    // non-`animate` topics we pause back to frame 0 so hotspots line up on their part.
+    var animReady = false;
+    function setupAnim() {
+      if (animReady || !hasAnim()) return animReady;
+      animReady = true;
+      ppBtn.hidden = false;
+      if (t.animate) applyPlay(true); else pauseAtStart();
+      return true;
+    }
+    mv.addEventListener('load', function () {
+      status.textContent = 'Model ready. Tap a marker or card to focus a part.';
+      // availableAnimations can lag the load event by a few seconds — keep checking.
+      if (!setupAnim()) { var n = 0, iv = setInterval(function () { if (setupAnim() || ++n > 40) clearInterval(iv); }, 200); }
+    });
+    mv.addEventListener('error', function () { status.textContent = 'Couldn’t load this model. Try again online once, then retry.'; });
+
+    var annos = t.annotations || [];
+
+    // Read-aloud (device text-to-speech), used by info cards + the guided tour.
+    var SPEAK_OK = ('speechSynthesis' in window) && ('SpeechSynthesisUtterance' in window);
+    function speak(text) {
+      if (!SPEAK_OK) return;
+      try { speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(text); u.rate = 0.98; speechSynthesis.speak(u); } catch (e) {}
+    }
+    function stopSpeak() { if (SPEAK_OK) { try { speechSynthesis.cancel(); } catch (e) {} } }
+
+    var COLOR = { 1: '#C77D0A' }; // Golgi = amber; others primary blue
+    var SLOT  = { 4: 'top', 3: 'right', 1: 'br', 2: 'bl', 5: 'left' };
+
+    var stage = document.getElementById('stage');
+    var cardsHost = document.getElementById('cards');
+    var svg = document.getElementById('leaders');
+    var cardEls = [], lineEls = [], current = -1;
+
+    function parseVec(s) { return s.trim().split(/\s+/).map(Number); }
+    function color(a) { return COLOR[a.id] || 'var(--primary)'; }
+
+    function flyTo(a) {
+      var p = parseVec(a.position), n = parseVec(a.normal);
+      var theta = Math.atan2(n[0], n[2]);
+      var phi = Math.acos(Math.max(-1, Math.min(1, n[1])));
+      mv.setAttribute('camera-target', p[0] + 'm ' + p[1] + 'm ' + p[2] + 'm');
+      mv.setAttribute('camera-orbit', theta + 'rad ' + phi + 'rad 0.3m');
+    }
+    // Only one card open at a time; tapping the same number toggles it closed.
+    function open(i) {
+      if (current === i) { close(); return; }
+      current = i;
+      cardEls.forEach(function (c, k) { c.classList.toggle('open', k === i); c.classList.toggle('active', k === i); });
+      mv.querySelectorAll('.hotspot').forEach(function (d) { d.classList.toggle('active', +d.getAttribute('data-index') === i); });
+      flyTo(annos[i]);
+    }
+    function close() {
+      current = -1;
+      cardEls.forEach(function (c) { c.classList.remove('open', 'active'); });
+      mv.querySelectorAll('.hotspot').forEach(function (d) { d.classList.remove('active'); });
+      mv.setAttribute('camera-target', 'auto auto auto');
+      mv.setAttribute('camera-orbit', '0deg 75deg auto');
+    }
+
+    if (annos.length) {
+      annos.forEach(function (a, i) {
+        // numbered dot on the model
+        var dot = document.createElement('button');
+        dot.type = 'button'; dot.className = 'hotspot';
+        dot.setAttribute('slot', 'hotspot-' + a.id);
+        dot.setAttribute('data-index', i);
+        dot.setAttribute('data-position', a.position);
+        dot.setAttribute('data-normal', a.normal);
+        dot.style.setProperty('--c', color(a));
+        dot.innerHTML = '<span class="hs-dot">' + a.id + '</span>';
+        dot.addEventListener('click', function (e) { e.stopPropagation(); open(i); });
+        mv.appendChild(dot);
+
+        // description card (hidden until its number is tapped)
+        var card = document.createElement('div');
+        card.className = 'info-card slot-' + (SLOT[a.id] || 'top');
+        card.style.setProperty('--c', color(a));
+        card.innerHTML =
+          '<div class="ic-head"><span class="ic-num">' + a.id + '</span>' +
+          '<span class="ic-title">' + BV.escape(a.title) + '</span>' +
+          (SPEAK_OK ? '<button class="ic-tts" type="button" aria-label="Read aloud"><svg viewBox="0 0 24 24" fill="none"><path d="M4 9v6h4l5 4V5L8 9H4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 8.5a4 4 0 010 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>' : '') +
+          '<button class="ic-close" type="button" aria-label="Close">&times;</button></div>' +
+          '<div class="ic-body">' + BV.escape(a.body) + '</div>';
+        card.querySelector('.ic-close').addEventListener('click', function (e) { e.stopPropagation(); close(); });
+        if (SPEAK_OK) card.querySelector('.ic-tts').addEventListener('click', function (e) { e.stopPropagation(); speak(a.title + '. ' + a.body); });
+        cardsHost.appendChild(card);
+        cardEls.push(card);
+
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('class', 'leader-line');
+        svg.appendChild(line);
+        lineEls.push(line);
+      });
+    }
+
+    // Continuously redraw leader lines from each card to its (moving) dot.
+    // Only the open card's leader line is drawn (one card at a time).
+    function tick() {
+      var sr = stage.getBoundingClientRect();
+      for (var i = 0; i < annos.length; i++) {
+        var line = lineEls[i];
+        if (i !== current) { line.style.opacity = 0; continue; }
+        var dot = mv.querySelector('.hotspot[data-index="' + i + '"]');
+        var card = cardEls[i];
+        if (!dot || !card) { line.style.opacity = 0; continue; }
+        var dr = dot.getBoundingClientRect(), cr = card.getBoundingClientRect();
+        line.setAttribute('x1', dr.left + dr.width / 2 - sr.left);
+        line.setAttribute('y1', dr.top + dr.height / 2 - sr.top);
+        line.setAttribute('x2', cr.left + cr.width / 2 - sr.left);
+        line.setAttribute('y2', cr.top + cr.height / 2 - sr.top);
+        line.style.opacity = 0.85;
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+
+    // ---- Guided tour (full-screen step-through) ----
+    var tourOv = document.getElementById('tour-ov'), tourStep = -1;
+    var $t = function (id) { return document.getElementById(id); };
+    if (SPEAK_OK) $t('tour-tts').hidden = false;
+    (function () {
+      var host = $t('tour-dots');
+      annos.forEach(function () { var d = document.createElement('span'); d.className = 'tour-dot'; host.appendChild(d); });
+      $t('tour-n').textContent = annos.length;
+    })();
+
+    function tourGoto(i) {
+      if (!annos.length) return;
+      tourStep = (i + annos.length) % annos.length;
+      var a = annos[tourStep];
+      $t('tour-i').textContent = tourStep + 1;
+      $t('tour-num').textContent = a.id;
+      $t('tour-title').textContent = a.title;
+      $t('tour-body').textContent = a.body;
+      current = tourStep;
+      mv.querySelectorAll('.hotspot').forEach(function (d) { d.classList.toggle('active', +d.getAttribute('data-index') === tourStep); });
+      cardEls.forEach(function (c) { c.classList.remove('open', 'active'); });
+      flyTo(a);
+      var dots = $t('tour-dots').children;
+      for (var k = 0; k < dots.length; k++) dots[k].classList.toggle('on', k === tourStep);
+      $t('tour-prev').disabled = tourStep === 0;
+      $t('tour-next').textContent = tourStep === annos.length - 1 ? 'Done' : 'Next';
+    }
+    function tourStart() { if (!annos.length) { status.textContent = 'No labels to tour yet.'; return; } tourOv.hidden = false; tourGoto(0); }
+    function tourEnd() { tourOv.hidden = true; stopSpeak(); close(); }
+    function tourNext() { if (tourStep >= annos.length - 1) tourEnd(); else tourGoto(tourStep + 1); }
+
+    document.getElementById('tour-btn').addEventListener('click', tourStart);
+    $t('tour-exit').addEventListener('click', function (e) { e.stopPropagation(); tourEnd(); });
+    $t('tour-prev').addEventListener('click', function (e) { e.stopPropagation(); tourGoto(tourStep - 1); });
+    $t('tour-next').addEventListener('click', function (e) { e.stopPropagation(); tourNext(); });
+    if (SPEAK_OK) $t('tour-tts').addEventListener('click', function (e) { e.stopPropagation(); var a = annos[tourStep]; speak(a.title + '. ' + a.body); });
+    tourOv.addEventListener('click', function (e) { if (e.target.closest('button')) return; tourNext(); });
+
+    // ---- Labels toggle (show/hide the numbered markers) ----
+    document.getElementById('labels-btn').addEventListener('click', function () {
+      var hidden = stage.classList.toggle('no-labels');
+      this.setAttribute('aria-pressed', hidden ? 'false' : 'true');
+      this.classList.toggle('off', hidden);
+    });
+
+    // Toolbar (uses the attribute API — the property setters don't take effect here)
+    function setRadius(mult) {
+      var o = mv.getCameraOrbit();
+      var r = Math.max(0.12, Math.min(1.6, o.radius * mult));
+      mv.setAttribute('camera-orbit', o.theta + 'rad ' + o.phi + 'rad ' + r + 'm');
+    }
+    document.getElementById('toolbar').addEventListener('click', function (e) {
+      var b = e.target.closest('.tool'); if (!b) return;
+      var act = b.getAttribute('data-act');
+      if (act === 'rotate') {
+        var on = !mv.hasAttribute('auto-rotate');
+        if (on) mv.setAttribute('auto-rotate', ''); else mv.removeAttribute('auto-rotate');
+        b.classList.toggle('on', on);
+      }
+      else if (act === 'pan') { b.classList.toggle('on'); status.textContent = 'Tip: drag with two fingers to pan the model.'; }
+      else if (act === 'zoomin') setRadius(0.72);
+      else if (act === 'zoomout') setRadius(1.4);
+      else if (act === 'playpause') { applyPlay(!playing); }
+      else if (act === 'reset') {
+        mv.removeAttribute('auto-rotate'); close();
+        // return an animated model to its labelled rest pose (labels lock back on)
+        if (hasAnim() && !t.animate) pauseAtStart();
+      }
+    });
+
+    // Attribution (CC-BY)
+    if (t.credit) {
+      var c = document.createElement('p');
+      c.className = 'ar-note ar-credit';
+      var name = t.credit.url ? '<a href="' + t.credit.url + '" target="_blank" rel="noopener">' + BV.escape(t.credit.title) + '</a>' : BV.escape(t.credit.title);
+      c.innerHTML = BV.escape(t.credit.what || '3D model') + ': ' + name + ' by ' + BV.escape(t.credit.author) + ' — ' + BV.escape(t.credit.license) + '.';
+      document.querySelector('.app').appendChild(c);
+    }
+  })();
+  </script>
+</body>
+</html>
