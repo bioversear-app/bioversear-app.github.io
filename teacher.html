@@ -527,11 +527,12 @@
       var initials = (name.trim()[0] || 'T').toUpperCase();
       var body = $('profile-body');
       body.innerHTML =
-        '<div class="acct-card t-pcard">' +
-          '<div class="t-pav" aria-hidden="true">' + esc(initials) + '</div>' +
-          '<div class="t-pinfo"><div class="t-pname">' + esc(name) + '</div>' +
-            '<div class="t-prole">Teacher</div>' +
-            '<div class="t-puser">@' + esc(profile.alias) + '</div></div>' +
+        '<div class="acct-card t-idcard">' +
+          '<div class="t-idbanner" aria-hidden="true"></div>' +
+          '<div class="t-idav" aria-hidden="true">' + esc(initials) + '</div>' +
+          '<div class="t-idname">' + esc(name) + '</div>' +
+          '<div class="t-prole">Teacher</div>' +
+          '<div class="t-puser">@' + esc(profile.alias) + '</div>' +
         '</div>' +
         '<div class="t-astats t-pstats">' +
           aTile(ag.classes, ag.classes === 1 ? 'Class' : 'Classes') + aTile(ag.students, 'Students') +
@@ -539,12 +540,14 @@
         '</div>' +
         '<h2 class="section-title">Account settings</h2>' +
         '<div class="acct-card pf-rows t-settings">' +
-          settingRow('name', personIcon(), 'Personal information', 'Update your display name') +
-          settingRow('pw', keyIcon(), 'Change password', 'Keep your account secure') +
-          settingRow('about', infoIcon(), 'About', 'App info, terms & privacy') +
+          settingRow('name', personIcon(), 'Personal information', 'Update your display name', 'blue') +
+          settingRow('pw', keyIcon(), 'Change password', 'Keep your account secure', 'green') +
+          settingRow('about', infoIcon(), 'About', 'App info, terms & privacy', 'amber') +
         '</div>' +
         '<div id="t-setpanel"></div>' +
-        '<button class="btn danger-outline" id="t-logout" type="button">Log out</button>' +
+        '<button class="btn danger-outline" id="t-logout" type="button">' +
+          '<svg class="t-logout-ic" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 12H4m0 0l4-4m-4 4l4 4M14 4h4a2 2 0 012 2v12a2 2 0 01-2 2h-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+          '<span>Log out</span></button>' +
         '<p class="pf-quote">Great teachers make a brighter tomorrow. 🌿</p>';
 
       body.querySelectorAll('.t-setrow').forEach(function (r) {
@@ -552,16 +555,24 @@
       });
       $('t-logout').addEventListener('click', function () { if (confirm('Log out?')) BV.signOut(); });
     }
-    function settingRow(k, icon, title, desc) {
-      return '<button class="pf-row t-setrow" type="button" data-k="' + k + '"><span class="pf-row-ic">' + icon + '</span>' +
+    function settingRow(k, icon, title, desc, tone) {
+      return '<button class="pf-row t-setrow" type="button" data-k="' + k + '" aria-expanded="false"><span class="pf-row-ic tone-' + (tone || 'blue') + '">' + icon + '</span>' +
              '<span class="t-set-txt"><b>' + title + '</b><small>' + desc + '</small></span>' +
              '<svg class="pf-row-go" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
     }
     var openSetting = null;
+    function syncSetrows() {
+      document.querySelectorAll('.t-setrow').forEach(function (r) {
+        var on = r.getAttribute('data-k') === openSetting;
+        r.classList.toggle('open', on);
+        r.setAttribute('aria-expanded', on ? 'true' : 'false');
+      });
+    }
     function toggleSetting(k) {
       var panel = $('t-setpanel');
-      if (openSetting === k) { openSetting = null; panel.innerHTML = ''; return; }
+      if (openSetting === k) { openSetting = null; panel.innerHTML = ''; syncSetrows(); return; }
       openSetting = k;
+      syncSetrows();
       if (k === 'name') {
         panel.innerHTML = '<form class="acct-card t-panel" id="t-nameform"><div class="field"><label for="t-newname">Display name</label>' +
           '<input id="t-newname" type="text" maxlength="60" value="' + esc(profile.fullName || '') + '"></div>' +
