@@ -233,10 +233,37 @@
       }).then(function () { loaded = true; });
     }
 
+    // ---- subject-themed class badge (auto-picked from the class name) ----
+    var SUBJICON = {
+      dna: '<svg viewBox="0 0 24 24" fill="none"><path d="M8 3c0 5 8 7 8 12M16 3c0 5-8 7-8 12M8 21c0-2 8-4 8-6M16 21c0-2-8-4-8-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+      leaf: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 19c0-8 6-13 14-13 0 8-5 14-13 14-1 0-1-1-1-1z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 16c3-3 6-5 9-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+      planet: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="1.7"/><ellipse cx="12" cy="12" rx="11" ry="4" stroke="currentColor" stroke-width="1.5" transform="rotate(-20 12 12)"/></svg>',
+      atom: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2" fill="currentColor"/><ellipse cx="12" cy="12" rx="10" ry="4.2" stroke="currentColor" stroke-width="1.4"/><ellipse cx="12" cy="12" rx="10" ry="4.2" stroke="currentColor" stroke-width="1.4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.2" stroke="currentColor" stroke-width="1.4" transform="rotate(120 12 12)"/></svg>',
+      book: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 4h8a3 3 0 013 3v13a3 3 0 00-3-3H5zM19 4a0 0 0 000 0v13" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M13 4v13" stroke="currentColor" stroke-width="1.6"/></svg>'
+    };
+    var SUBJECTS = [
+      { re: /(biolog|\bcell|\bdna|genetic|anatomy|organism)/, icon: 'dna', color: '#2E9E6B' },
+      { re: /(plant|\bleaf|photosynth|ecosystem|\becolog|botan|nature)/, icon: 'leaf', color: '#2E9E6B' },
+      { re: /(space|solar|earth|astro|planet|universe|cosmo)/, icon: 'planet', color: '#7A4FD6' },
+      { re: /(chemi|\batom|physic|matter|energy|\bforce|motion|\belement|\bscience)/, icon: 'atom', color: '#C77D0A' }
+    ];
+    var CYCLE = ['#185FA5', '#2E9E6B', '#7A4FD6', '#C77D0A', '#0E8C8C'];
+    function classTheme(name, idx) {
+      var n = (name || '').toLowerCase();
+      for (var k = 0; k < SUBJECTS.length; k++) if (SUBJECTS[k].re.test(n)) return { icon: SUBJICON[SUBJECTS[k].icon], color: SUBJECTS[k].color };
+      return { icon: SUBJICON.book, color: CYCLE[(idx || 0) % CYCLE.length] };
+    }
+    var COPYICON = '<svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M5 15V5a2 2 0 012-2h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+    var CHECKICON = '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    var PEOPLEICON = '<svg class="tcard-count-ic" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M4 19c0-2.8 2.2-4.5 5-4.5s5 1.7 5 4.5M16 6a3 3 0 010 5.7M18 14c2 .4 3.4 1.7 3.4 3.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+    var STARICON = '<svg class="tcard-star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.5 6 .7-4.4 4.1 1.2 5.9L12 16.9 6.6 19.2l1.2-5.9L3.4 9.2l6-.7z" fill="#F5A524"/></svg>';
+    function flashCopy(btn) { var o = btn.innerHTML; btn.innerHTML = CHECKICON; btn.classList.add('done'); setTimeout(function () { btn.innerHTML = o; btn.classList.remove('done'); }, 1200); }
+
     // ============ DASHBOARD ============
-    function statTile(icon, value, label, tint) {
-      return '<div class="t-stat" role="listitem"><span class="t-stat-ic" style="background:' + tint + '">' + icon + '</span>' +
-             '<b class="t-stat-val">' + value + '</b><small class="t-stat-lbl">' + label + '</small></div>';
+    function statTile(icon, value, label, color, sub) {
+      return '<div class="t-stat" role="listitem"><span class="t-stat-ic" style="color:' + color + ';background:' + color + '1A">' + icon + '</span>' +
+             '<b class="t-stat-val">' + value + '</b><small class="t-stat-lbl">' + label + '</small>' +
+             (sub ? '<small class="t-stat-sub">' + sub + '</small>' : '') + '</div>';
     }
     function aggregate() {
       var all = [];
@@ -248,35 +275,47 @@
       if (!loaded) { $('dash-classes').innerHTML = loadingBox(); return; }
       var ag = aggregate();
       var IC = {
-        stu: '<svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="#fff" stroke-width="1.8"/><path d="M3.5 19c0-3 2.5-4.8 5.5-4.8s5.5 1.8 5.5 4.8M16 5.5a3 3 0 010 5.9" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>',
-        cls: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4zM4 10h16" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>',
-        prog: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 19V11M12 19V5M19 19v-5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>',
-        pts: '<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.5 6 .7-4.4 4.1 1.2 5.9L12 16.9 6.6 19.2l1.2-5.9L3.4 9.2l6-.7z" fill="#fff"/></svg>'
+        stu: '<svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 19c0-3 2.5-4.8 5.5-4.8s5.5 1.8 5.5 4.8M16 5.5a3 3 0 010 5.9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+        cls: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4zM4 10h16" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+        prog: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 19V11M12 19V5M19 19v-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+        pts: '<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.5 6 .7-4.4 4.1 1.2 5.9L12 16.9 6.6 19.2l1.2-5.9L3.4 9.2l6-.7z" fill="currentColor"/></svg>'
       };
       $('dash-stats').innerHTML =
-        statTile(IC.stu, ag.students, 'Students', '#2E9E6B') +
-        statTile(IC.cls, ag.classes, ag.classes === 1 ? 'Class' : 'Classes', '#185FA5') +
-        statTile(IC.prog, ag.prog + '%', 'Avg progress', '#7A4FD6') +
-        statTile(IC.pts, ag.points.toLocaleString(), 'Total points', '#C77D0A');
+        statTile(IC.stu, ag.students, 'Students', '#2E9E6B', 'Across all classes') +
+        statTile(IC.cls, ag.classes, ag.classes === 1 ? 'Class' : 'Classes', '#185FA5', ag.classes === 1 ? 'Active class' : 'Active classes') +
+        statTile(IC.prog, ag.prog + '%', 'Avg. progress', '#7A4FD6', 'Class performance') +
+        statTile(IC.pts, ag.points.toLocaleString(), 'Total points', '#C77D0A', 'Points earned');
 
       // class cards
       var host = $('dash-classes'); host.innerHTML = '';
       if (!classes.length) {
         host.innerHTML = emptyState('📚', 'No classes yet', 'Create your first class and share its code so students can join.');
-      } else classes.forEach(function (c) {
+      } else classes.forEach(function (c, idx) {
         var d = classData[c.code] || { students: [] };
         var st = classStats(d.students);
-        var el = document.createElement('button');
-        el.type = 'button'; el.className = 'tcard';
+        var th = classTheme(c.name, idx);
+        var el = document.createElement('div');
+        el.className = 'tcard'; el.setAttribute('role', 'button'); el.tabIndex = 0;
+        el.setAttribute('aria-label', c.name + ', ' + st.n + ' student' + (st.n === 1 ? '' : 's') + ', ' + st.prog + '% average progress');
         el.innerHTML =
-          '<div class="tcard-top"><span class="tcard-badge" aria-hidden="true">' + esc((c.name || 'C').trim()[0] || 'C').toUpperCase() + '</span>' +
-            '<span class="tcard-head"><span class="tcard-name">' + esc(c.name) + '</span>' +
-              '<span class="tcard-code">Code <b>' + esc(c.code) + '</b> · ' + st.n + ' student' + (st.n === 1 ? '' : 's') + '</span></span>' +
-            '<span class="tcard-go" aria-hidden="true">›</span></div>' +
-          '<div class="tcard-prog"><div class="tcard-prog-top"><span>Average progress</span><span>' + st.prog + '%</span></div>' +
-            '<div class="pbar"><i style="width:' + st.prog + '%;background:' + progColor(st.prog) + '"></i></div></div>' +
-          '<div class="tcard-foot"><span class="tcard-pts">⭐ ' + st.points.toLocaleString() + ' total points</span></div>';
-        el.addEventListener('click', function () { currentCode = c.code; showView('students'); });
+          '<div class="tcard-top">' +
+            '<span class="tcard-badge" style="color:' + th.color + ';background:' + th.color + '1A" aria-hidden="true">' + th.icon + '</span>' +
+            '<span class="tcard-head">' +
+              '<span class="tcard-name">' + esc(c.name) + '</span>' +
+              '<span class="tcard-code">Class code <b>' + esc(c.code) + '</b>' +
+                '<button class="tcard-copy" type="button" aria-label="Copy class code">' + COPYICON + '</button></span>' +
+              '<span class="tcard-count">' + PEOPLEICON + st.n + ' student' + (st.n === 1 ? '' : 's') + '</span>' +
+            '</span>' +
+            '<span class="tcard-go" aria-hidden="true">›</span>' +
+          '</div>' +
+          '<div class="tcard-prog"><div class="tcard-prog-top"><span>Average progress</span><span style="color:' + th.color + '">' + st.prog + '%</span></div>' +
+            '<div class="pbar"><i style="width:' + st.prog + '%;background:' + th.color + '"></i></div></div>' +
+          '<div class="tcard-foot"><span class="tcard-pts">' + STARICON + '<b>' + st.points.toLocaleString() + '</b>&nbsp;total points</span></div>';
+        function open() { currentCode = c.code; showView('students'); }
+        el.addEventListener('click', function (e) { if (e.target.closest('.tcard-copy')) return; open(); });
+        el.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('.tcard-copy')) { e.preventDefault(); open(); } });
+        var cp = el.querySelector('.tcard-copy');
+        cp.addEventListener('click', function (e) { e.stopPropagation(); copyText(c.code, null); flashCopy(cp); });
         host.appendChild(el);
       });
 

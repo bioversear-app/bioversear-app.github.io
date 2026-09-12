@@ -1044,7 +1044,8 @@ form.acct-card .btn { margin-top: 2px; }
 .t-stat-ic { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; margin-bottom: 4px; }
 .t-stat-ic svg { width: 18px; height: 18px; }
 .t-stat-val { font-size: 20px; font-weight: 800; line-height: 1; color: var(--ink); }
-.t-stat-lbl { font-size: 11.5px; color: var(--muted); font-weight: 600; }
+.t-stat-lbl { font-size: 12px; color: var(--ink-soft); font-weight: 700; }
+.t-stat-sub { font-size: 10.5px; color: var(--muted); font-weight: 600; margin-top: 1px; }
 @media (min-width: 560px) { .t-stats { grid-template-columns: repeat(4, 1fr); } }
 
 /* ---- Section head with action ---- */
@@ -1054,20 +1055,32 @@ form.acct-card .btn { margin-top: 2px; }
 .btn.t-create-btn svg { width: 16px; height: 16px; }
 
 /* ---- Class cards (Dashboard) ---- */
-.tcard { display: block; width: 100%; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-bottom: 12px; box-shadow: var(--shadow); cursor: pointer; font: inherit; color: var(--ink); -webkit-appearance: none; appearance: none; }
-.tcard:active { background: var(--surface-2); }
-.tcard-top { display: flex; align-items: center; gap: 11px; }
-.tcard-badge { width: 40px; height: 40px; border-radius: 12px; flex: 0 0 auto; display: grid; place-items: center; font-size: 17px; font-weight: 800; color: #fff; background: linear-gradient(135deg, #2E9E6B, #1f7a4d); }
-.tcard-badge.sm { width: 34px; height: 34px; border-radius: 10px; font-size: 15px; }
+.tcard { display: block; width: 100%; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-bottom: 12px; box-shadow: var(--shadow); cursor: pointer; font: inherit; color: var(--ink); -webkit-appearance: none; appearance: none; transition: box-shadow .15s ease, transform .06s ease; }
+.tcard:hover { box-shadow: 0 2px 6px rgba(4,44,83,.08), 0 10px 26px rgba(4,44,83,.09); }
+.tcard:active { transform: scale(.995); background: var(--surface-2); }
+.tcard:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.tcard-top { display: flex; align-items: flex-start; gap: 12px; }
+.tcard-badge { width: 44px; height: 44px; border-radius: 13px; flex: 0 0 auto; display: grid; place-items: center; }
+.tcard-badge svg { width: 24px; height: 24px; }
+.tcard-badge.sm { width: 34px; height: 34px; border-radius: 10px; }
+.tcard-badge.sm svg { width: 19px; height: 19px; }
 .tcard-head { flex: 1; min-width: 0; }
 .tcard-name { display: block; font-size: 15.5px; font-weight: 800; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tcard-code { display: block; font-size: 12.5px; color: var(--muted); margin-top: 1px; }
-.tcard-code b { color: var(--primary); }
-.tcard-go { flex: 0 0 auto; color: var(--muted); font-size: 24px; line-height: 1; }
-.tcard-prog { margin-top: 12px; }
-.tcard-prog-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 5px; }
-.tcard-foot { margin-top: 10px; }
-.tcard-pts { font-size: 13px; font-weight: 700; color: var(--accent); }
+.tcard-code { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.tcard-code b { color: var(--primary); font-weight: 800; letter-spacing: .02em; }
+.tcard-copy { border: 0; background: none; padding: 1px; color: var(--muted); cursor: pointer; display: inline-grid; place-items: center; -webkit-appearance: none; appearance: none; border-radius: 6px; }
+.tcard-copy svg { width: 15px; height: 15px; display: block; }
+.tcard-copy:active { background: var(--surface-2); }
+.tcard-copy.done { color: #2E9E6B; }
+.tcard-count { display: flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+.tcard-count-ic { width: 15px; height: 15px; flex: 0 0 auto; }
+.tcard-go { flex: 0 0 auto; color: var(--line); font-size: 26px; line-height: 1; margin-top: 6px; }
+.tcard-prog { margin-top: 13px; }
+.tcard-prog-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); font-weight: 700; margin-bottom: 5px; }
+.tcard-foot { margin-top: 11px; }
+.tcard-pts { display: inline-flex; align-items: center; font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+.tcard-pts b { font-weight: 800; color: var(--ink); }
+.tcard-star { width: 16px; height: 16px; margin-right: 5px; flex: 0 0 auto; }
 
 /* ---- Progress bar (shared) ---- */
 .pbar { height: 9px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
