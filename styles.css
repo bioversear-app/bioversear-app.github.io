@@ -1016,3 +1016,175 @@ form.acct-card .btn { margin-top: 2px; }
 .cm-next { background: var(--primary); color: #fff; }
 .cm-skip { position: absolute; top: 12px; right: 13px; background: none; border: 0; color: var(--muted); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .cm-hole { transition: none; } }
+
+/* ============================================================================
+   TEACHER CONSOLE — redesigned UI (Dashboard / Students / Analytics / Profile)
+   Reuses tokens: --primary --ink --muted --line --surface --surface-2
+   --primary-tint --accent --radius --shadow. Bottom nav reuses .bottomnav/.navitem.
+   ============================================================================ */
+.tapp { }
+.tview { animation: tFade .22s ease both; }
+@keyframes tFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .tview { animation: none; } }
+
+/* bottom nav uses <button> — normalize */
+.bottomnav button.navitem { -webkit-appearance: none; appearance: none; background: none; border: 0; font: inherit; color: var(--muted); cursor: pointer; }
+.bottomnav .navitem span { font-size: 11px; font-weight: 600; }
+
+/* ---- Dashboard hero ---- */
+.t-hero { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin: 2px 0 16px; }
+.t-hello { font-size: 13.5px; color: var(--muted); margin: 0; font-weight: 600; }
+.t-hero-name { font-size: 23px; line-height: 1.15; margin: 1px 0 4px; letter-spacing: -.01em; color: var(--ink); }
+.t-hero-sub { font-size: 13px; color: var(--muted); margin: 0; max-width: 30ch; }
+.t-hero-mascot { width: 78px; height: auto; flex: 0 0 auto; margin-top: -4px; filter: drop-shadow(0 6px 12px rgba(4,44,83,.14)); }
+
+/* ---- Stat tiles ---- */
+.t-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.t-stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 2px; }
+.t-stat-ic { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; margin-bottom: 4px; }
+.t-stat-ic svg { width: 18px; height: 18px; }
+.t-stat-val { font-size: 20px; font-weight: 800; line-height: 1; color: var(--ink); }
+.t-stat-lbl { font-size: 11.5px; color: var(--muted); font-weight: 600; }
+@media (min-width: 560px) { .t-stats { grid-template-columns: repeat(4, 1fr); } }
+
+/* ---- Section head with action ---- */
+.t-sec-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.t-sec-head .section-title { margin-bottom: 12px; }
+.btn.t-create-btn { width: auto; min-height: 0; padding: 9px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 5px; margin: 0; border-radius: 999px; }
+.btn.t-create-btn svg { width: 16px; height: 16px; }
+
+/* ---- Class cards (Dashboard) ---- */
+.tcard { display: block; width: 100%; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-bottom: 12px; box-shadow: var(--shadow); cursor: pointer; font: inherit; color: var(--ink); -webkit-appearance: none; appearance: none; }
+.tcard:active { background: var(--surface-2); }
+.tcard-top { display: flex; align-items: center; gap: 11px; }
+.tcard-badge { width: 40px; height: 40px; border-radius: 12px; flex: 0 0 auto; display: grid; place-items: center; font-size: 17px; font-weight: 800; color: #fff; background: linear-gradient(135deg, #2E9E6B, #1f7a4d); }
+.tcard-badge.sm { width: 34px; height: 34px; border-radius: 10px; font-size: 15px; }
+.tcard-head { flex: 1; min-width: 0; }
+.tcard-name { display: block; font-size: 15.5px; font-weight: 800; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tcard-code { display: block; font-size: 12.5px; color: var(--muted); margin-top: 1px; }
+.tcard-code b { color: var(--primary); }
+.tcard-go { flex: 0 0 auto; color: var(--muted); font-size: 24px; line-height: 1; }
+.tcard-prog { margin-top: 12px; }
+.tcard-prog-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 5px; }
+.tcard-foot { margin-top: 10px; }
+.tcard-pts { font-size: 13px; font-weight: 700; color: var(--accent); }
+
+/* ---- Progress bar (shared) ---- */
+.pbar { height: 9px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.pbar i { display: block; height: 100%; border-radius: 999px; background: var(--primary); transition: width .3s ease; }
+.pbar.sm { height: 7px; }
+
+/* ---- Quick actions ---- */
+.t-quick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+.t-qa { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 13px; box-shadow: var(--shadow); cursor: pointer; font: inherit; text-align: left; -webkit-appearance: none; appearance: none; }
+.t-qa:active { background: var(--surface-2); }
+.t-qa-ic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; margin-bottom: 4px; }
+.t-qa-ic svg { width: 20px; height: 20px; }
+.t-qa-t { font-size: 13.5px; font-weight: 800; color: var(--ink); }
+.t-qa-d { font-size: 11.5px; color: var(--muted); line-height: 1.35; }
+
+/* ---- Highlights ---- */
+.t-hilist { padding: 6px 14px; }
+.t-hi { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; color: var(--ink-soft); }
+.t-hi:last-child { border-bottom: 0; }
+.t-hi-ic { flex: 0 0 auto; font-size: 17px; width: 26px; text-align: center; }
+
+/* ---- Empty states ---- */
+.t-empty { text-align: center; background: var(--surface-2); border-radius: 16px; padding: 30px 20px; }
+.t-empty-ic { font-size: 34px; margin-bottom: 8px; }
+.t-empty-t { font-size: 15px; font-weight: 800; color: var(--ink); margin-bottom: 4px; }
+.t-empty-d { font-size: 13px; color: var(--muted); line-height: 1.5; max-width: 32ch; margin: 0 auto; }
+
+/* ---- View headers (Students/Analytics/Profile) ---- */
+.t-viewhead { margin: 2px 0 14px; }
+
+/* ---- Class picker (chips, horizontal scroll) ---- */
+.t-classpick { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.t-classpick::-webkit-scrollbar { display: none; }
+.t-chipclass { flex: 0 0 auto; font: inherit; font-size: 13px; font-weight: 700; color: var(--muted); background: var(--surface); border: 1.5px solid var(--line); border-radius: 999px; padding: 8px 15px; cursor: pointer; white-space: nowrap; }
+.t-chipclass.on { color: #fff; background: var(--primary); border-color: var(--primary); }
+
+/* ---- Class bar (current class summary) ---- */
+.t-classbar { margin-bottom: 14px; }
+.t-classbar-inner { display: flex; align-items: center; gap: 11px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 11px 13px; box-shadow: var(--shadow); }
+.t-classbar-txt { flex: 1; min-width: 0; }
+.t-classbar-name { font-size: 15px; font-weight: 800; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.t-classbar-meta { font-size: 12px; color: var(--muted); }
+.t-classbar-meta b { color: var(--primary); }
+
+/* ---- Search + filter ---- */
+.t-searchrow { display: flex; gap: 8px; margin-bottom: 12px; }
+.t-search { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; padding: 0 12px; }
+.t-filter { max-width: 42vw; }
+.t-search svg { width: 18px; height: 18px; color: var(--muted); flex: 0 0 auto; }
+.t-search input { flex: 1; min-width: 0; border: 0; background: none; font: inherit; font-size: 14px; padding: 11px 0; color: var(--ink); outline: none; -webkit-appearance: none; appearance: none; }
+.t-filter { flex: 0 0 auto; font: inherit; font-size: 13px; font-weight: 600; color: var(--ink); background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; padding: 0 10px; cursor: pointer; }
+
+/* ---- Student cards ---- */
+.tstu { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 10px; box-shadow: var(--shadow); overflow: hidden; }
+.tstu-head { display: flex; align-items: center; gap: 11px; width: 100%; padding: 12px; background: none; border: 0; font: inherit; text-align: left; cursor: pointer; -webkit-appearance: none; appearance: none; min-height: 56px; }
+.tstu-av { width: 42px; height: 42px; border-radius: 50%; flex: 0 0 auto; background: var(--surface-2); display: grid; place-items: center; overflow: hidden; }
+.tstu-av svg { width: 100%; height: 100%; }
+.tstu-av.sm { width: 32px; height: 32px; }
+.t-av-letter { font-weight: 800; color: var(--primary); font-size: 17px; }
+.tstu-main { flex: 1; min-width: 0; }
+.tstu-name { display: block; font-size: 14.5px; font-weight: 700; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tstu-user { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+.tstu-prog { display: flex; align-items: center; gap: 7px; }
+.tstu-prog .pbar { flex: 1; max-width: 140px; }
+.tstu-progn { font-size: 11.5px; font-weight: 700; color: var(--muted); }
+.tstu-side { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex: 0 0 auto; }
+.tstu-pts { font-size: 12.5px; font-weight: 800; color: var(--accent); white-space: nowrap; }
+.tstu-badges { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.tstu-caret { flex: 0 0 auto; color: var(--muted); font-size: 16px; transition: transform .2s ease; }
+.tstu.open .tstu-caret { transform: rotate(180deg); }
+.tstu-detail { padding: 0 12px 12px; }
+.tstu-detail .tstu-reset { width: auto; min-height: 0; padding: 8px 14px; font-size: 13px; margin: 0; }
+.tstu-pw { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+.tstu-pw input { flex: 1; min-width: 150px; box-sizing: border-box; font: inherit; font-size: 14px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); -webkit-appearance: none; appearance: none; }
+.tstu-pw .btn { width: auto; min-height: 0; padding: 10px 16px; font-size: 14px; margin: 0; }
+.tstu-pw .tstu-msg { flex-basis: 100%; margin: 0; }
+
+/* ---- Analytics ---- */
+.t-astats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+.t-astat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 13px; box-shadow: var(--shadow); text-align: left; }
+.t-astat b { display: block; font-size: 19px; font-weight: 800; color: var(--ink); line-height: 1; }
+.t-astat small { font-size: 11.5px; color: var(--muted); font-weight: 600; }
+@media (min-width: 560px) { .t-astats { grid-template-columns: repeat(4, 1fr); } }
+.t-pstats { margin-top: 14px; }
+.t-distbar { display: flex; height: 18px; border-radius: 999px; overflow: hidden; background: var(--surface-2); margin: 4px 0 14px; }
+.t-distbar i { display: block; }
+.t-distleg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
+.t-leg { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--muted); }
+.t-leg b { margin-left: auto; color: var(--ink); }
+.t-leg-dot { width: 10px; height: 10px; border-radius: 3px; flex: 0 0 auto; }
+.t-toprow { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.t-toprow:last-child { border-bottom: 0; }
+.t-toprank { width: 22px; height: 22px; border-radius: 50%; flex: 0 0 auto; display: grid; place-items: center; font-size: 12px; font-weight: 800; color: var(--muted); background: var(--surface-2); }
+.t-toprank.r1 { background: #FFE9A8; color: #8a5e00; }
+.t-toprank.r2 { background: #E3E9F0; color: #52627a; }
+.t-toprank.r3 { background: #F3D9BE; color: #8a4a1e; }
+.t-topname { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 700; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.t-topname small { display: block; font-size: 11px; font-weight: 500; color: var(--muted); }
+.t-toppts { font-size: 12.5px; font-weight: 800; color: var(--accent); flex: 0 0 auto; }
+
+/* ---- Profile ---- */
+.t-pcard { display: flex; align-items: center; gap: 14px; padding: 16px; }
+.t-pav { width: 58px; height: 58px; border-radius: 50%; flex: 0 0 auto; display: grid; place-items: center; font-size: 22px; font-weight: 800; color: #fff; background: linear-gradient(135deg, #3E82D6, var(--primary)); }
+.t-pinfo { min-width: 0; }
+.t-pname { font-size: 18px; font-weight: 800; color: var(--ink); }
+.t-prole { display: inline-block; font-size: 11.5px; font-weight: 700; color: var(--primary); background: var(--primary-tint); border-radius: 999px; padding: 2px 10px; margin: 3px 0; }
+.t-puser { font-size: 12.5px; color: var(--muted); }
+.t-settings { padding: 0 14px; }
+.t-set-txt { flex: 1; min-width: 0; }
+.t-set-txt b { display: block; font-size: 14px; color: var(--ink); }
+.t-set-txt small { font-size: 12px; color: var(--muted); }
+.t-panel { margin: 10px 0 4px; padding: 16px 14px 14px; }
+.t-about p { margin: 4px 0; font-size: 13.5px; color: var(--ink-soft); }
+.t-about a { color: var(--primary); }
+
+/* ---- Create-class success ---- */
+.t-created { text-align: center; }
+.t-created-ic { width: 44px; height: 44px; border-radius: 50%; background: #E3F4E8; color: #2CA457; font-size: 24px; font-weight: 800; display: grid; place-items: center; margin: 0 auto 10px; }
+.t-created-code { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 8px 0 14px; font-size: 18px; }
+.t-created-code b { color: var(--primary); letter-spacing: .05em; }

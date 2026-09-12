@@ -15,52 +15,100 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="app">
-    <header class="pf-head t-head">
-      <div>
-        <h1 class="page-h">Teacher</h1>
-        <p class="pf-sub">Signed in as <strong id="t-name">teacher</strong></p>
+  <div class="app has-nav tapp">
+
+    <!-- ============ DASHBOARD ============ -->
+    <section id="view-dashboard" class="tview">
+      <header class="t-hero">
+        <div class="t-hero-txt">
+          <p class="t-hello" id="t-greeting">Welcome,</p>
+          <h1 class="t-hero-name" id="t-name">Teacher</h1>
+          <p class="t-hero-sub">Manage your classes and monitor student progress.</p>
+        </div>
+        <img class="t-hero-mascot" src="assets/mascot/tarsier-correct.png" alt="" aria-hidden="true">
+      </header>
+
+      <div class="t-stats" id="dash-stats" role="list" aria-label="Overview"></div>
+
+      <div class="t-sec-head">
+        <h2 class="section-title">My Classes</h2>
+        <button class="btn t-create-btn" id="open-create" type="button">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Create Class
+        </button>
       </div>
-      <button class="iconbtn" id="logout" title="Log out" aria-label="Log out">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M15 12H4m0 0l3.5-3.5M4 12l3.5 3.5M13 7V5a2 2 0 012-2h3a2 2 0 012 2v14a2 2 0 01-2 2h-3a2 2 0 01-2-2v-2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-    </header>
+      <div id="dash-classes"></div>
 
-    <!-- CLASSES -->
-    <section id="classes-view">
-      <h2 class="section-title">Create a class</h2>
-      <form id="create-form" class="acct-card" novalidate>
-        <div class="field"><label for="c-name">Class name</label><input id="c-name" type="text" maxlength="40" placeholder="e.g. Grade 7 - Rizal"></div>
-        <div class="form-msg" id="create-msg"></div>
-        <button class="btn" type="submit">Create class</button>
-      </form>
-      <p class="acct-note">A code is generated for each class — share it with your students so they can join.</p>
+      <h2 class="section-title">Quick Actions</h2>
+      <div class="t-quick" id="dash-quick"></div>
 
-      <h2 class="section-title">Your classes</h2>
-      <div id="class-list"></div>
+      <h2 class="section-title">Highlights</h2>
+      <div id="dash-highlights"></div>
     </section>
 
-    <!-- ROSTER + INSIGHTS -->
-    <section id="roster-view" hidden>
-      <button class="iconbtn" id="roster-back" type="button" style="margin-bottom:12px" aria-label="Back to classes">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <h1 class="page-h" id="roster-title">Class</h1>
-      <div class="t-codeline">Code <b id="roster-code">—</b> <button class="t-copy" id="roster-copy" type="button">Copy</button></div>
+    <!-- ============ STUDENTS ============ -->
+    <section id="view-students" class="tview" hidden>
+      <header class="t-viewhead"><h1 class="page-h">Students</h1><p class="pf-sub">See who's doing well and who needs help.</p></header>
+      <div class="t-classpick" id="students-pick" role="tablist" aria-label="Choose a class"></div>
+      <div class="t-classbar" id="students-classbar"></div>
+      <div class="t-searchrow">
+        <div class="t-search">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <input id="stu-search" type="search" placeholder="Search by name or username…" aria-label="Search students" autocomplete="off">
+        </div>
+        <select id="stu-filter" class="t-filter" aria-label="Filter students">
+          <option value="all">All</option>
+          <option value="top">Top (70%+)</option>
+          <option value="help">Needs help (&lt;50%)</option>
+          <option value="none">Not started</option>
+        </select>
+      </div>
+      <div id="students-list"></div>
+    </section>
 
-      <div class="t-summary" id="t-summary"></div>
+    <!-- ============ ANALYTICS ============ -->
+    <section id="view-analytics" class="tview" hidden>
+      <header class="t-viewhead"><h1 class="page-h">Analytics</h1><p class="pf-sub">How your class is performing.</p></header>
+      <div class="t-classpick" id="analytics-pick" role="tablist" aria-label="Choose a class"></div>
+      <div class="t-classbar" id="analytics-classbar"></div>
+      <div id="analytics-body"></div>
+    </section>
 
-      <h2 class="section-title">Topic performance</h2>
-      <div class="acct-card t-topics" id="t-topics"></div>
-
-      <h2 class="section-title">Students</h2>
-      <div id="roster-list"></div>
+    <!-- ============ PROFILE ============ -->
+    <section id="view-profile" class="tview" hidden>
+      <header class="t-viewhead"><h1 class="page-h">Profile</h1><p class="pf-sub">Your account and preferences.</p></header>
+      <div id="profile-body"></div>
     </section>
 
     <div class="spacer-grow"></div>
   </div>
 
-  <!-- Join-by-QR (opened from a class's QR button) -->
+  <nav id="bottomnav" class="bottomnav" aria-label="Teacher navigation"></nav>
+
+  <!-- Create-class modal -->
+  <div class="modal-ov" id="create-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="create-title">
+      <button class="modal-x" id="create-close" type="button" aria-label="Close">&times;</button>
+      <h3 id="create-title">Create a class</h3>
+      <p class="modal-desc">A join code is generated automatically — share it with your students.</p>
+      <form id="create-form" novalidate>
+        <div class="field"><label for="c-name">Class name</label>
+          <input id="c-name" type="text" maxlength="40" placeholder="e.g. Grade 7 - Rizal" autocomplete="off"></div>
+        <div class="form-msg" id="create-msg"></div>
+        <button class="btn" type="submit">Create class</button>
+      </form>
+      <div id="create-done" hidden>
+        <div class="t-created">
+          <div class="t-created-ic" aria-hidden="true">✓</div>
+          <p>Class created! Share this code:</p>
+          <div class="t-created-code"><b id="created-code">—</b><button class="t-copy" id="created-copy" type="button">Copy</button></div>
+          <button class="btn secondary" id="created-qr" type="button">Show QR code</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Join-by-QR modal -->
   <div class="modal-ov" id="qr-modal" hidden>
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="qr-title">
       <button class="modal-x" id="qr-close" type="button" aria-label="Close">&times;</button>
@@ -82,169 +130,294 @@
     'use strict';
     var profile = BV.requireTeacher(); if (!profile) return;
     var $ = function (id) { return document.getElementById(id); };
-    $('t-name').textContent = profile.fullName || profile.alias;
-    $('logout').addEventListener('click', function () { if (confirm('Log out?')) BV.signOut(); });
-
+    var esc = BV.escape;
     var TOPICS = (window.TOPICS || []).filter(function (t) { return t.ready; });
+    var TN = Math.max(1, TOPICS.length);
 
+    // ---- state ----
+    var classes = [];          // [{id, code, name, student_count}]
+    var classData = {};        // code -> { students:[...], loaded:true }
+    var currentCode = null;    // selected class for Students / Analytics
+    var loaded = false;
+
+    // ---- greeting + teacher name ----
+    (function () {
+      var h = new Date().getHours();
+      $('t-greeting').textContent = (h < 12 ? 'Good morning,' : h < 18 ? 'Good afternoon,' : 'Good evening,');
+      $('t-name').textContent = (profile.fullName || profile.alias || 'Teacher') + ' 👋';
+    })();
+
+    // ---- bottom nav ----
+    var NAVICON = {
+      dashboard: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-6 8 6M6 10v9h4v-5h4v5h4v-9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      students: '<svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5M16 5.2a3 3 0 010 5.9M18 13.5c2.2.4 3.8 1.9 3.8 4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+      analytics: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 20V10M12 20V4M19 20v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+      profile: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.7"/><path d="M5 20c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>'
+    };
+    var NAV = [
+      { id: 'dashboard', label: 'Dashboard' },
+      { id: 'students', label: 'Students' },
+      { id: 'analytics', label: 'Analytics' },
+      { id: 'profile', label: 'Profile' }
+    ];
+    function renderNav(active) {
+      $('bottomnav').innerHTML = NAV.map(function (it) {
+        var on = it.id === active;
+        return '<button class="navitem' + (on ? ' on' : '') + '" type="button" data-view="' + it.id + '"' + (on ? ' aria-current="page"' : '') + '>' +
+               NAVICON[it.id] + '<span>' + it.label + '</span></button>';
+      }).join('');
+    }
+    $('bottomnav').addEventListener('click', function (e) {
+      var b = e.target.closest('.navitem'); if (!b) return;
+      showView(b.getAttribute('data-view'));
+    });
+
+    var VIEWS = ['dashboard', 'students', 'analytics', 'profile'];
+    function showView(name) {
+      VIEWS.forEach(function (v) { $('view-' + v).hidden = (v !== name); });
+      renderNav(name);
+      window.scrollTo(0, 0);
+      if (name === 'students') renderStudents();
+      else if (name === 'analytics') renderAnalytics();
+      else if (name === 'profile') renderProfile();
+      else if (name === 'dashboard') renderDashboard();
+    }
+
+    // ---- helpers ----
     function copyText(text, btn) {
       function ok() { if (btn) { var o = btn.textContent; btn.textContent = 'Copied!'; setTimeout(function () { btn.textContent = o; }, 1200); } }
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, function () {});
       else { try { var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); ok(); } catch (e) {} }
     }
     function shortName(n) { return n.length > 12 ? n.split(' ')[0] : n; }
-
-    // ---- Join-by-QR: a QR of index.html?class=CODE. Scanning it opens student
-    // sign-up with the class code pre-filled. ----
-    function joinUrl(code) { return new URL('index.html?class=' + encodeURIComponent(code), location.href).href; }
-    function openQr(c) {
-      var url = joinUrl(c.code);
-      $('qr-title').textContent = c.name;
-      $('qr-code').textContent = c.code;
-      var box = $('qr-box');
-      try {
-        var q = window.qrcode(0, 'M'); q.addData(url); q.make();
-        box.innerHTML = q.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
-      } catch (e) { box.textContent = 'Could not generate the QR code.'; }
-      $('qr-copylink').onclick = function () { copyText(url, this); };
-      $('qr-modal').hidden = false;
+    function pct(n) { return Math.max(0, Math.min(100, Math.round(n))); }
+    function progColor(p) { return p >= 70 ? '#2E9E6B' : p >= 40 ? '#C77D0A' : '#B42318'; }
+    function avatarCell(info, cls) {
+      var svg = info.avatar && BV.avatarSvg(info.avatar);
+      return svg ? '<span class="' + cls + '">' + svg + '</span>'
+                 : '<span class="' + cls + ' t-av-letter">' + (((info.alias || '?').trim()[0] || '?').toUpperCase()) + '</span>';
     }
-    $('qr-close').addEventListener('click', function () { $('qr-modal').hidden = true; });
-    $('qr-modal').addEventListener('click', function (e) { if (e.target === this) this.hidden = true; });
 
-    // ---- Classes list ----
-    function classCard(c) {
-      var el = document.createElement('div');
-      el.className = 'tclass';
-      el.innerHTML =
-        '<button class="tclass-open" type="button"><span class="tclass-name"></span>' +
-          '<span class="tclass-meta">Code <b>' + BV.escape(c.code) + '</b> · ' + c.student_count + ' student' + (c.student_count == 1 ? '' : 's') + '</span></button>' +
-        '<div class="tclass-actions">' +
-          '<button class="t-mini" type="button" data-act="copy">Copy code</button>' +
-          '<button class="t-mini" type="button" data-act="qr">QR</button>' +
-          '<button class="t-mini" type="button" data-act="rename">Rename</button>' +
-          '<span class="tclass-go" aria-hidden="true">›</span></div>';
-      el.querySelector('.tclass-name').textContent = c.name;
-      el.querySelector('.tclass-open').addEventListener('click', function () { openRoster(c); });
-      el.querySelector('[data-act="copy"]').addEventListener('click', function () { copyText(c.code, this); });
-      el.querySelector('[data-act="qr"]').addEventListener('click', function () { openQr(c); });
-      el.querySelector('[data-act="rename"]').addEventListener('click', function () {
-        var nn = prompt('Rename this class:', c.name); if (nn == null) return; nn = nn.trim();
-        if (!nn || nn === c.name) return;
-        BV.renameClass(c.id, nn).then(function (r) {
-          if (r.ok) { c.name = nn; el.querySelector('.tclass-name').textContent = nn; }
-          else alert(r.error);
-        });
-      });
-      return el;
-    }
-    function loadClasses() {
-      var host = $('class-list'); host.innerHTML = '<div class="lb-empty">Loading…</div>';
-      BV.getTeacherClasses().then(function (list) {
-        host.innerHTML = '';
-        if (!list.length) { host.innerHTML = '<div class="lb-empty">No classes yet. Create one above and share its code with your students.</div>'; return; }
-        list.forEach(function (c) { host.appendChild(classCard(c)); });
-      });
-    }
-    $('create-form').addEventListener('submit', function (e) {
-      e.preventDefault();
-      var name = $('c-name').value.trim(), msg = $('create-msg');
-      function show(kind, text) { msg.className = 'form-msg show ' + kind; msg.textContent = text; }
-      if (!name) { show('err', 'Enter a class name.'); return; }
-      var btn = this.querySelector('button[type="submit"]'); btn.disabled = true; var t = btn.textContent; btn.textContent = 'Creating…';
-      BV.createClass(name).then(function (r) {
-        btn.disabled = false; btn.textContent = t;
-        if (r.ok) { show('ok', 'Class created — code ' + r.cls.code); $('c-name').value = ''; loadClasses(); }
-        else { show('err', r.error); }
-      });
-    });
-    $('c-name').addEventListener('input', function () { $('create-msg').className = 'form-msg'; });
-
-    // ---- Roster + insights ----
-    function openRoster(c) {
-      $('classes-view').hidden = true; $('roster-view').hidden = false;
-      window.scrollTo(0, 0);
-      $('roster-title').textContent = c.name;
-      $('roster-code').textContent = c.code;
-      $('roster-copy').onclick = function () { copyText(c.code, this); };
-      $('t-summary').innerHTML = '';
-      $('t-topics').innerHTML = '<div class="lb-empty">Loading…</div>';
-      $('roster-list').innerHTML = '<div class="lb-empty">Loading…</div>';
-      Promise.all([BV.getClassRoster(c.code), BV.getClassScores(c.code)]).then(function (res) {
-        renderRoster(c, res[0] || [], res[1] || []);
-      });
-    }
-    $('roster-back').addEventListener('click', function () { $('roster-view').hidden = true; $('classes-view').hidden = false; });
-
-    function renderRoster(c, roster, scores) {
-      // Merge: roster = all students (incl. non-attempters); scores = per-topic (attempters).
+    // Merge roster (all students) + scores (per-topic) into student objects.
+    function mergeStudents(roster, scores) {
       var byId = {};
-      roster.forEach(function (s) { byId[s.student_id] = { info: s, topics: {}, passedCount: 0 }; });
-      scores.forEach(function (r) {
+      (roster || []).forEach(function (s) { byId[s.student_id] = { info: s, topics: {}, passedCount: 0 }; });
+      (scores || []).forEach(function (r) {
         var st = byId[r.student_id] || (byId[r.student_id] = { info: { student_id: r.student_id, full_name: r.full_name, alias: r.alias, avatar: r.avatar, score: 0, badges: 0 }, topics: {}, passedCount: 0 });
         st.topics[r.topic_id] = { score: Number(r.score) || 0, passed: !!r.passed };
         if (r.passed) st.passedCount++;
       });
-      var students = Object.keys(byId).map(function (k) { return byId[k]; });
-      var total = students.length;
+      return Object.keys(byId).map(function (k) {
+        var s = byId[k]; s.completion = pct(s.passedCount / TN * 100);
+        s.points = Number(s.info.score) || 0; return s;
+      });
+    }
+    function classStats(students) {
+      var n = students.length;
+      var points = students.reduce(function (a, s) { return a + s.points; }, 0);
+      var prog = n ? Math.round(students.reduce(function (a, s) { return a + s.completion; }, 0) / n) : 0;
+      var attempts = students.reduce(function (a, s) { return a + Object.keys(s.topics).length; }, 0);
+      return { n: n, points: points, prog: prog, attempts: attempts };
+    }
 
-      // Summary
-      var avgScore = total ? Math.round(students.reduce(function (a, s) { return a + (Number(s.info.score) || 0); }, 0) / total) : 0;
-      var avgDone = total ? Math.round(students.reduce(function (a, s) { return a + (s.passedCount / TOPICS.length * 100); }, 0) / total) : 0;
-      $('t-summary').innerHTML =
-        summaryStat(total, total === 1 ? 'student' : 'students') +
-        summaryStat(avgScore, 'avg points') +
-        summaryStat(avgDone + '%', 'completion');
+    // ---- data load: classes + each class's roster/scores (once, cached) ----
+    function loadAll() {
+      return BV.getTeacherClasses().then(function (list) {
+        classes = list || [];
+        if (!currentCode && classes.length) currentCode = classes[0].code;
+        return Promise.all(classes.map(function (c) {
+          return Promise.all([BV.getClassRoster(c.code), BV.getClassScores(c.code)]).then(function (res) {
+            classData[c.code] = { students: mergeStudents(res[0], res[1]), loaded: true };
+          });
+        }));
+      }).then(function () { loaded = true; });
+    }
 
-      // Topic performance — % of the class that has passed each topic
-      var thost = $('t-topics'); thost.innerHTML = '';
-      if (!total) { thost.innerHTML = '<div class="lb-empty">No student data yet.</div>'; }
-      else TOPICS.forEach(function (t) {
-        var passed = 0, attempted = 0, sum = 0;
-        students.forEach(function (s) { var x = s.topics[t.id]; if (x) { attempted++; sum += x.score; if (x.passed) passed++; } });
-        var rate = Math.round(passed / total * 100);
-        var color = rate >= 70 ? '#2E9E6B' : rate >= 40 ? '#C77D0A' : '#B42318';
-        var row = document.createElement('div'); row.className = 't-topic';
-        row.innerHTML =
-          '<div class="t-topic-head"><span class="t-topic-name">' + BV.escape(t.name) + '</span>' +
-            '<span class="t-topic-stat">' + passed + '/' + total + ' passed</span></div>' +
-          '<div class="t-topic-bar"><i style="width:' + rate + '%;background:' + color + '"></i></div>';
-        thost.appendChild(row);
+    // ============ DASHBOARD ============
+    function statTile(icon, value, label, tint) {
+      return '<div class="t-stat" role="listitem"><span class="t-stat-ic" style="background:' + tint + '">' + icon + '</span>' +
+             '<b class="t-stat-val">' + value + '</b><small class="t-stat-lbl">' + label + '</small></div>';
+    }
+    function aggregate() {
+      var all = [];
+      classes.forEach(function (c) { var d = classData[c.code]; if (d) all = all.concat(d.students); });
+      var st = classStats(all);
+      return { classes: classes.length, students: st.n, points: st.points, prog: st.prog, all: all };
+    }
+    function renderDashboard() {
+      if (!loaded) { $('dash-classes').innerHTML = loadingBox(); return; }
+      var ag = aggregate();
+      var IC = {
+        stu: '<svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="#fff" stroke-width="1.8"/><path d="M3.5 19c0-3 2.5-4.8 5.5-4.8s5.5 1.8 5.5 4.8M16 5.5a3 3 0 010 5.9" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>',
+        cls: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4zM4 10h16" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+        prog: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 19V11M12 19V5M19 19v-5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>',
+        pts: '<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.5 6 .7-4.4 4.1 1.2 5.9L12 16.9 6.6 19.2l1.2-5.9L3.4 9.2l6-.7z" fill="#fff"/></svg>'
+      };
+      $('dash-stats').innerHTML =
+        statTile(IC.stu, ag.students, 'Students', '#2E9E6B') +
+        statTile(IC.cls, ag.classes, ag.classes === 1 ? 'Class' : 'Classes', '#185FA5') +
+        statTile(IC.prog, ag.prog + '%', 'Avg progress', '#7A4FD6') +
+        statTile(IC.pts, ag.points.toLocaleString(), 'Total points', '#C77D0A');
+
+      // class cards
+      var host = $('dash-classes'); host.innerHTML = '';
+      if (!classes.length) {
+        host.innerHTML = emptyState('📚', 'No classes yet', 'Create your first class and share its code so students can join.');
+      } else classes.forEach(function (c) {
+        var d = classData[c.code] || { students: [] };
+        var st = classStats(d.students);
+        var el = document.createElement('button');
+        el.type = 'button'; el.className = 'tcard';
+        el.innerHTML =
+          '<div class="tcard-top"><span class="tcard-badge" aria-hidden="true">' + esc((c.name || 'C').trim()[0] || 'C').toUpperCase() + '</span>' +
+            '<span class="tcard-head"><span class="tcard-name">' + esc(c.name) + '</span>' +
+              '<span class="tcard-code">Code <b>' + esc(c.code) + '</b> · ' + st.n + ' student' + (st.n === 1 ? '' : 's') + '</span></span>' +
+            '<span class="tcard-go" aria-hidden="true">›</span></div>' +
+          '<div class="tcard-prog"><div class="tcard-prog-top"><span>Average progress</span><span>' + st.prog + '%</span></div>' +
+            '<div class="pbar"><i style="width:' + st.prog + '%;background:' + progColor(st.prog) + '"></i></div></div>' +
+          '<div class="tcard-foot"><span class="tcard-pts">⭐ ' + st.points.toLocaleString() + ' total points</span></div>';
+        el.addEventListener('click', function () { currentCode = c.code; showView('students'); });
+        host.appendChild(el);
       });
 
-      // Students (sorted by score desc)
-      var host = $('roster-list'); host.innerHTML = '';
-      if (!total) { host.innerHTML = '<div class="lb-empty">No students have joined code ' + BV.escape(c.code) + ' yet.</div>'; return; }
-      students.sort(function (a, b) { return (Number(b.info.score) || 0) - (Number(a.info.score) || 0); });
-      students.forEach(function (s) { host.appendChild(studentRow(s)); });
-    }
-    function summaryStat(num, lbl) { return '<div class="t-sum"><b>' + num + '</b><small>' + lbl + '</small></div>'; }
+      // quick actions
+      var QA = [
+        { k: 'students', t: 'Manage Students', d: 'View & manage your class list', c: '#2E9E6B', i: NAVICON.students },
+        { k: 'analytics', t: 'View Analytics', d: 'Check learning analytics', c: '#7A4FD6', i: NAVICON.analytics },
+        { k: 'leaderboard', t: 'Class Leaderboard', d: 'See top-performing students', c: '#C77D0A', i: '<svg viewBox="0 0 24 24" fill="none"><path d="M8 21h8M12 17v4M6 4h12v4a6 6 0 01-12 0V4zM6 6H4v1a3 3 0 003 3M18 6h2v1a3 3 0 01-3 3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+        { k: 'share', t: 'Share Class', d: 'Let students join by QR', c: '#185FA5', i: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h3v3h-3zM20 14v3M17 20h3" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>' }
+      ];
+      $('dash-quick').innerHTML = QA.map(function (q) {
+        return '<button class="t-qa" type="button" data-qa="' + q.k + '"><span class="t-qa-ic" style="color:' + q.c + ';background:' + q.c + '18">' + q.i + '</span>' +
+               '<span class="t-qa-t">' + q.t + '</span><span class="t-qa-d">' + q.d + '</span></button>';
+      }).join('');
+      $('dash-quick').querySelectorAll('.t-qa').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var k = b.getAttribute('data-qa');
+          if (k === 'students') showView('students');
+          else if (k === 'analytics') showView('analytics');
+          else if (k === 'leaderboard') showView('analytics');
+          else if (k === 'share') { if (currentCode) { var c = classByCode(currentCode); if (c) openQr(c); } else openCreate(); }
+        });
+      });
 
-    function studentRow(s) {
+      renderHighlights(ag);
+    }
+
+    function renderHighlights(ag) {
+      var host = $('dash-highlights');
+      if (!ag.all.length) { host.innerHTML = emptyState('🌱', 'No activity yet', 'Once students join and take quizzes, highlights will appear here.'); return; }
+      var items = [];
+      // top performer
+      var top = ag.all.slice().sort(function (a, b) { return b.points - a.points; })[0];
+      if (top && top.points > 0) items.push(hi('🏆', esc(top.info.full_name || top.info.alias) + ' leads with ' + top.points.toLocaleString() + ' points'));
+      // badges earned
+      var badgeStudents = ag.all.filter(function (s) { return s.passedCount > 0; }).length;
+      if (badgeStudents) items.push(hi('🏅', badgeStudents + ' of ' + ag.all.length + ' students have earned a badge'));
+      // most completed topic across all classes
+      var best = topTopicAcross(ag.all);
+      if (best) items.push(hi('📈', 'Most completed: ' + esc(best.name) + ' (' + best.rate + '% passed)'));
+      if (!items.length) items.push(hi('🌱', 'Students have joined — encourage them to start a quiz!'));
+      host.innerHTML = '<div class="acct-card t-hilist">' + items.join('') + '</div>';
+    }
+    function hi(emoji, text) { return '<div class="t-hi"><span class="t-hi-ic" aria-hidden="true">' + emoji + '</span><span>' + text + '</span></div>'; }
+    function topTopicAcross(all) {
+      if (!all.length) return null;
+      var best = null;
+      TOPICS.forEach(function (t) {
+        var passed = 0; all.forEach(function (s) { if (s.topics[t.id] && s.topics[t.id].passed) passed++; });
+        var rate = pct(passed / all.length * 100);
+        if (!best || rate > best.rate) best = { name: t.name, rate: rate };
+      });
+      return best && best.rate > 0 ? best : null;
+    }
+
+    function classByCode(code) { for (var i = 0; i < classes.length; i++) if (classes[i].code === code) return classes[i]; return null; }
+    function loadingBox() { return '<div class="lb-empty">Loading…</div>'; }
+    function emptyState(emoji, title, desc) {
+      return '<div class="t-empty"><div class="t-empty-ic" aria-hidden="true">' + emoji + '</div>' +
+             '<div class="t-empty-t">' + title + '</div><div class="t-empty-d">' + desc + '</div></div>';
+    }
+
+    // ---- shared class-picker (Students / Analytics) ----
+    function renderPicker(hostId, onPick) {
+      var host = $(hostId);
+      if (!classes.length) { host.innerHTML = ''; return; }
+      host.innerHTML = classes.map(function (c) {
+        var on = c.code === currentCode;
+        return '<button class="t-chipclass' + (on ? ' on' : '') + '" type="button" role="tab" aria-selected="' + on + '" data-code="' + esc(c.code) + '">' + esc(c.name) + '</button>';
+      }).join('');
+      host.querySelectorAll('.t-chipclass').forEach(function (b) {
+        b.addEventListener('click', function () { currentCode = b.getAttribute('data-code'); onPick(); });
+      });
+    }
+    function classBar(hostId, extra) {
+      var c = classByCode(currentCode); var host = $(hostId);
+      if (!c) { host.innerHTML = ''; return; }
+      var d = classData[c.code] || { students: [] }; var st = classStats(d.students);
+      host.innerHTML =
+        '<div class="t-classbar-inner"><span class="tcard-badge sm" aria-hidden="true">' + esc((c.name || 'C').trim()[0] || 'C').toUpperCase() + '</span>' +
+        '<div class="t-classbar-txt"><div class="t-classbar-name">' + esc(c.name) + '</div>' +
+        '<div class="t-classbar-meta">Code <b>' + esc(c.code) + '</b> · ' + st.n + ' student' + (st.n === 1 ? '' : 's') + '</div></div>' +
+        '<button class="t-mini" type="button" id="' + hostId + '-copy">Copy code</button></div>';
+      var cp = $(hostId + '-copy'); if (cp) cp.addEventListener('click', function () { copyText(c.code, this); });
+    }
+
+    // ============ STUDENTS ============
+    function renderStudents() {
+      if (!loaded) { $('students-list').innerHTML = loadingBox(); return; }
+      if (!classes.length) { $('students-pick').innerHTML = ''; $('students-classbar').innerHTML = ''; $('students-list').innerHTML = emptyState('👩‍🏫', 'No classes yet', 'Create a class from the Dashboard to add students.'); return; }
+      renderPicker('students-pick', renderStudents);
+      classBar('students-classbar');
+      paintStudentList();
+    }
+    function paintStudentList() {
+      var d = classData[currentCode] || { students: [] };
+      var q = ($('stu-search').value || '').trim().toLowerCase();
+      var f = $('stu-filter').value;
+      var list = d.students.slice().sort(function (a, b) { return b.points - a.points; });
+      list = list.filter(function (s) {
+        if (q) { var hay = ((s.info.full_name || '') + ' ' + (s.info.alias || '')).toLowerCase(); if (hay.indexOf(q) < 0) return false; }
+        if (f === 'top') return s.completion >= 70;
+        if (f === 'help') return s.completion < 50 && Object.keys(s.topics).length > 0;
+        if (f === 'none') return Object.keys(s.topics).length === 0;
+        return true;
+      });
+      var host = $('students-list'); host.innerHTML = '';
+      if (!d.students.length) { host.innerHTML = emptyState('🧑‍🎓', 'No students yet', 'Share code ' + esc(currentCode) + ' so students can join this class.'); return; }
+      if (!list.length) { host.innerHTML = emptyState('🔍', 'No matches', 'Try a different search or filter.'); return; }
+      list.forEach(function (s) { host.appendChild(studentCard(s)); });
+    }
+    $('stu-search').addEventListener('input', paintStudentList);
+    $('stu-filter').addEventListener('change', paintStudentList);
+
+    function studentCard(s) {
       var info = s.info;
-      var row = document.createElement('div'); row.className = 'troster';
-      var avSvg = info.avatar && BV.avatarSvg(info.avatar);
-      var avCell = avSvg ? '<span class="troster-av">' + avSvg + '</span>'
-                         : '<span class="troster-av troster-av-letter">' + (((info.alias || '?').trim()[0] || '?').toUpperCase()) + '</span>';
+      var card = document.createElement('div'); card.className = 'tstu';
       var chips = TOPICS.map(function (t) {
         var x = s.topics[t.id]; var cls = x ? (x.passed ? 'pass' : 'try') : 'none';
         var title = t.name + (x ? (' · ' + x.score + ' pts' + (x.passed ? ' · passed' : '')) : ' · not started');
-        return '<span class="t-chip ' + cls + '" title="' + BV.escape(title) + '">' + BV.escape(shortName(t.name)) + '</span>';
+        return '<span class="t-chip ' + cls + '" title="' + esc(title) + '">' + esc(shortName(t.name)) + '</span>';
       }).join('');
-      row.innerHTML =
-        '<button class="troster-head" type="button">' + avCell +
-          '<span class="troster-main"><span class="troster-name">' + BV.escape(info.full_name || '(no name)') + '</span>' +
-          '<span class="troster-sub">@' + BV.escape(info.alias) + ' · ' + (Number(info.score) || 0) + ' pts · ' + s.passedCount + '/' + TOPICS.length + ' topics</span></span>' +
-          '<span class="troster-go" aria-hidden="true">›</span></button>' +
-        '<div class="troster-detail" hidden>' +
+      card.innerHTML =
+        '<button class="tstu-head" type="button" aria-expanded="false">' +
+          avatarCell(info, 'tstu-av') +
+          '<span class="tstu-main"><span class="tstu-name">' + esc(info.full_name || '(no name)') + '</span>' +
+            '<span class="tstu-user">@' + esc(info.alias) + '</span>' +
+            '<span class="tstu-prog"><span class="pbar sm"><i style="width:' + s.completion + '%;background:' + progColor(s.completion) + '"></i></span>' +
+              '<span class="tstu-progn">' + s.completion + '%</span></span></span>' +
+          '<span class="tstu-side"><span class="tstu-pts">⭐ ' + s.points.toLocaleString() + '</span>' +
+            '<span class="tstu-badges">🏅 ' + (Number(info.badges) || s.passedCount) + '</span></span>' +
+          '<span class="tstu-caret" aria-hidden="true">⌄</span></button>' +
+        '<div class="tstu-detail" hidden>' +
           '<div class="t-chips">' + chips + '</div>' +
-          '<button class="btn secondary troster-reset" type="button">Reset password</button>' +
-          '<form class="troster-pw" hidden><input type="password" maxlength="64" placeholder="6+ chars · 1 uppercase · 1 number · 1 symbol"><button class="btn" type="submit">Set</button><div class="form-msg troster-msg"></div></form>' +
+          '<button class="btn secondary tstu-reset" type="button">Reset password</button>' +
+          '<form class="tstu-pw" hidden><input type="password" maxlength="64" placeholder="6+ chars · 1 uppercase · 1 number · 1 symbol"><button class="btn" type="submit">Set</button><div class="form-msg tstu-msg"></div></form>' +
         '</div>';
-      var detail = row.querySelector('.troster-detail');
-      row.querySelector('.troster-head').addEventListener('click', function () { detail.hidden = !detail.hidden; row.classList.toggle('open', !detail.hidden); });
-      var pwForm = row.querySelector('.troster-pw'), pwInput = pwForm.querySelector('input'), pwMsg = pwForm.querySelector('.troster-msg');
-      row.querySelector('.troster-reset').addEventListener('click', function () { pwForm.hidden = !pwForm.hidden; if (!pwForm.hidden) pwInput.focus(); });
+      var head = card.querySelector('.tstu-head'), detail = card.querySelector('.tstu-detail');
+      head.addEventListener('click', function () { var open = detail.hidden; detail.hidden = !open; card.classList.toggle('open', open); head.setAttribute('aria-expanded', String(open)); });
+      var pwForm = card.querySelector('.tstu-pw'), pwInput = pwForm.querySelector('input'), pwMsg = pwForm.querySelector('.tstu-msg');
+      card.querySelector('.tstu-reset').addEventListener('click', function () { pwForm.hidden = !pwForm.hidden; if (!pwForm.hidden) pwInput.focus(); });
       pwForm.addEventListener('submit', function (e) {
         e.preventDefault();
         var pw = pwInput.value;
@@ -261,10 +434,215 @@
           else { show('err', r.error); }
         });
       });
-      return row;
+      return card;
     }
 
-    loadClasses();
+    // ============ ANALYTICS ============
+    function renderAnalytics() {
+      if (!loaded) { $('analytics-body').innerHTML = loadingBox(); return; }
+      if (!classes.length) { $('analytics-pick').innerHTML = ''; $('analytics-classbar').innerHTML = ''; $('analytics-body').innerHTML = emptyState('📊', 'No classes yet', 'Create a class to see analytics.'); return; }
+      renderPicker('analytics-pick', renderAnalytics);
+      classBar('analytics-classbar');
+      var d = classData[currentCode] || { students: [] };
+      var students = d.students; var st = classStats(students);
+      var body = $('analytics-body');
+      if (!students.length) { body.innerHTML = emptyState('📊', 'No student data yet', 'Analytics appear once students join and take quizzes.'); return; }
+
+      var avgScore = st.n ? Math.round(st.points / st.n) : 0;
+      // overview tiles
+      var overview =
+        '<div class="t-astats">' +
+          aTile(st.n, 'Students') + aTile(st.prog + '%', 'Avg progress') +
+          aTile(avgScore.toLocaleString(), 'Avg points') + aTile(st.attempts, 'Quizzes taken') +
+        '</div>';
+
+      // topic completion
+      var topicRows = TOPICS.map(function (t) {
+        var passed = 0; students.forEach(function (s) { if (s.topics[t.id] && s.topics[t.id].passed) passed++; });
+        var rate = pct(passed / st.n * 100);
+        return '<div class="t-topic"><div class="t-topic-head"><span class="t-topic-name">' + esc(t.name) + '</span>' +
+               '<span class="t-topic-stat">' + passed + '/' + st.n + ' passed</span></div>' +
+               '<div class="pbar"><i style="width:' + rate + '%;background:' + progColor(rate) + '"></i></div></div>';
+      }).join('');
+      var topics = '<h2 class="section-title">Topic completion</h2><div class="acct-card">' + topicRows + '</div>';
+
+      // performance distribution
+      var band = { exc: 0, good: 0, avg: 0, help: 0 };
+      students.forEach(function (s) { var p = s.completion; if (p >= 90) band.exc++; else if (p >= 70) band.good++; else if (p >= 50) band.avg++; else band.help++; });
+      function seg(n, c) { return n ? '<i style="flex:' + n + ';background:' + c + '"></i>' : ''; }
+      var dist =
+        '<h2 class="section-title">Performance distribution</h2><div class="acct-card">' +
+          '<div class="t-distbar">' + seg(band.exc, '#2E9E6B') + seg(band.good, '#3E82D6') + seg(band.avg, '#C77D0A') + seg(band.help, '#B42318') + '</div>' +
+          '<div class="t-distleg">' +
+            legend('#2E9E6B', 'Excellent (90%+)', band.exc) + legend('#3E82D6', 'Good (70–89%)', band.good) +
+            legend('#C77D0A', 'Average (50–69%)', band.avg) + legend('#B42318', 'Needs help (<50%)', band.help) +
+          '</div></div>';
+
+      // top performers
+      var top = students.slice().sort(function (a, b) { return b.points - a.points; }).slice(0, 5);
+      var topRows = top.map(function (s, i) {
+        return '<div class="t-toprow"><span class="t-toprank r' + (i + 1) + '">' + (i + 1) + '</span>' +
+               avatarCell(s.info, 'tstu-av sm') +
+               '<span class="t-topname">' + esc(s.info.full_name || s.info.alias) + '<small>@' + esc(s.info.alias) + '</small></span>' +
+               '<span class="t-toppts">⭐ ' + s.points.toLocaleString() + '</span></div>';
+      }).join('');
+      var topPerf = '<h2 class="section-title">Top performing students</h2><div class="acct-card">' + topRows + '</div>';
+
+      // insights (real)
+      var ins = [];
+      var bestTopic = topTopicAcross(students);
+      if (bestTopic) ins.push(hi('✅', 'Most completed: ' + esc(bestTopic.name) + ' (' + bestTopic.rate + '% passed)'));
+      if (band.help) ins.push(hi('💡', band.help + ' student' + (band.help === 1 ? '' : 's') + ' may need help (under 50% progress)'));
+      if (top[0] && top[0].points > 0) ins.push(hi('🏆', 'Top performer: ' + esc(top[0].info.full_name || top[0].info.alias)));
+      var insights = ins.length ? '<h2 class="section-title">Insights</h2><div class="acct-card t-hilist">' + ins.join('') + '</div>' : '';
+
+      // quiz trend — no time-series data available: honest empty state
+      var trend = '<h2 class="section-title">Quiz performance trend</h2>' +
+        '<div class="acct-card">' + emptyState('🕓', 'Trends coming soon', 'The app keeps each student\'s best result, so a week-by-week trend isn\'t tracked yet.') + '</div>';
+
+      body.innerHTML = overview + topics + dist + topPerf + insights + trend;
+    }
+    function aTile(v, l) { return '<div class="t-astat"><b>' + v + '</b><small>' + l + '</small></div>'; }
+    function legend(c, l, n) { return '<div class="t-leg"><span class="t-leg-dot" style="background:' + c + '"></span>' + l + '<b>' + n + '</b></div>'; }
+
+    // ============ PROFILE ============
+    function renderProfile() {
+      var ag = aggregate();
+      var name = profile.fullName || profile.alias || 'Teacher';
+      var initials = (name.trim()[0] || 'T').toUpperCase();
+      var body = $('profile-body');
+      body.innerHTML =
+        '<div class="acct-card t-pcard">' +
+          '<div class="t-pav" aria-hidden="true">' + esc(initials) + '</div>' +
+          '<div class="t-pinfo"><div class="t-pname">' + esc(name) + '</div>' +
+            '<div class="t-prole">Teacher</div>' +
+            '<div class="t-puser">@' + esc(profile.alias) + '</div></div>' +
+        '</div>' +
+        '<div class="t-astats t-pstats">' +
+          aTile(ag.classes, ag.classes === 1 ? 'Class' : 'Classes') + aTile(ag.students, 'Students') +
+          aTile(ag.prog + '%', 'Avg progress') + aTile(ag.points.toLocaleString(), 'Total points') +
+        '</div>' +
+        '<h2 class="section-title">Account settings</h2>' +
+        '<div class="acct-card pf-rows t-settings">' +
+          settingRow('name', personIcon(), 'Personal information', 'Update your display name') +
+          settingRow('pw', keyIcon(), 'Change password', 'Keep your account secure') +
+          settingRow('about', infoIcon(), 'About', 'App info, terms & privacy') +
+        '</div>' +
+        '<div id="t-setpanel"></div>' +
+        '<button class="btn danger-outline" id="t-logout" type="button">Log out</button>' +
+        '<p class="pf-quote">Great teachers make a brighter tomorrow. 🌿</p>';
+
+      body.querySelectorAll('.t-setrow').forEach(function (r) {
+        r.addEventListener('click', function () { toggleSetting(r.getAttribute('data-k')); });
+      });
+      $('t-logout').addEventListener('click', function () { if (confirm('Log out?')) BV.signOut(); });
+    }
+    function settingRow(k, icon, title, desc) {
+      return '<button class="pf-row t-setrow" type="button" data-k="' + k + '"><span class="pf-row-ic">' + icon + '</span>' +
+             '<span class="t-set-txt"><b>' + title + '</b><small>' + desc + '</small></span>' +
+             '<svg class="pf-row-go" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+    }
+    var openSetting = null;
+    function toggleSetting(k) {
+      var panel = $('t-setpanel');
+      if (openSetting === k) { openSetting = null; panel.innerHTML = ''; return; }
+      openSetting = k;
+      if (k === 'name') {
+        panel.innerHTML = '<form class="acct-card t-panel" id="t-nameform"><div class="field"><label for="t-newname">Display name</label>' +
+          '<input id="t-newname" type="text" maxlength="60" value="' + esc(profile.fullName || '') + '"></div>' +
+          '<div class="form-msg" id="t-namemsg"></div><button class="btn" type="submit">Save name</button></form>';
+        $('t-nameform').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var v = $('t-newname').value, m = $('t-namemsg');
+          var b = this.querySelector('button'); b.disabled = true;
+          BV.updateName(v).then(function (r) {
+            b.disabled = false;
+            if (r.ok) { profile.fullName = r.fullName; m.className = 'form-msg show ok'; m.textContent = 'Saved.'; $('t-name').textContent = r.fullName + ' 👋'; }
+            else { m.className = 'form-msg show err'; m.textContent = r.error; }
+          });
+        });
+      } else if (k === 'pw') {
+        panel.innerHTML = '<form class="acct-card t-panel" id="t-pwform" novalidate>' +
+          '<div class="field"><label for="t-np">New password</label><input id="t-np" type="password" autocomplete="new-password" maxlength="64" placeholder="6+ chars · 1 uppercase · 1 number · 1 symbol"></div>' +
+          '<div class="field"><label for="t-cp">Confirm new password</label><input id="t-cp" type="password" autocomplete="new-password" maxlength="64" placeholder="type it again"></div>' +
+          '<div class="form-msg" id="t-pwmsg"></div><button class="btn" type="submit">Update password</button></form>';
+        $('t-pwform').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var np = $('t-np').value, cp = $('t-cp').value, m = $('t-pwmsg');
+          function show(kind, t) { m.className = 'form-msg show ' + kind; m.textContent = t; }
+          var perr = np.length < 6 ? 'Password must be at least 6 characters.'
+            : !/[A-Z]/.test(np) ? 'Add at least 1 uppercase letter.'
+            : !/[0-9]/.test(np) ? 'Add at least 1 number.'
+            : !/[^A-Za-z0-9]/.test(np) ? 'Add at least 1 special character (e.g. ! @ # ?).' : null;
+          if (perr) { show('err', perr); return; }
+          if (np !== cp) { show('err', 'The two passwords do not match.'); return; }
+          var b = this.querySelector('button'); b.disabled = true; var t = b.textContent; b.textContent = 'Updating…';
+          BV.changePassword(np).then(function (r) {
+            b.disabled = false; b.textContent = t;
+            if (r.ok) { show('ok', 'Password updated.'); $('t-np').value = ''; $('t-cp').value = ''; }
+            else { show('err', r.error); }
+          });
+        });
+      } else if (k === 'about') {
+        panel.innerHTML = '<div class="acct-card t-panel t-about"><p><b>BioVerseAR</b> — Teacher console.</p>' +
+          '<p>Gamified, markerless-AR Grade 7 science.</p>' +
+          '<p><a href="terms.html">Terms &amp; Conditions · Privacy Policy</a></p></div>';
+      }
+    }
+    function personIcon() { return '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M5 20c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'; }
+    function keyIcon() { return '<svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="15" r="4.2" stroke="currentColor" stroke-width="1.6"/><path d="M11 13l8-8M17 5l2 2M15 7l2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
+    function infoIcon() { return '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5M12 8h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'; }
+
+    // ============ CREATE CLASS (modal) ============
+    function openCreate() {
+      $('create-form').hidden = false; $('create-done').hidden = true;
+      $('c-name').value = ''; $('create-msg').className = 'form-msg';
+      $('create-modal').hidden = false; setTimeout(function () { $('c-name').focus(); }, 60);
+    }
+    $('open-create').addEventListener('click', openCreate);
+    $('create-close').addEventListener('click', function () { $('create-modal').hidden = true; });
+    $('create-modal').addEventListener('click', function (e) { if (e.target === this) this.hidden = true; });
+    $('c-name').addEventListener('input', function () { $('create-msg').className = 'form-msg'; });
+    $('create-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name = $('c-name').value.trim(), msg = $('create-msg');
+      function show(kind, text) { msg.className = 'form-msg show ' + kind; msg.textContent = text; }
+      if (!name) { show('err', 'Enter a class name.'); return; }
+      var btn = this.querySelector('button[type="submit"]'); btn.disabled = true; var t = btn.textContent; btn.textContent = 'Creating…';
+      BV.createClass(name).then(function (r) {
+        btn.disabled = false; btn.textContent = t;
+        if (!r.ok) { show('err', r.error); return; }
+        var newCode = r.cls.code;
+        // refresh data, then show the code + share
+        loadAll().then(function () {
+          currentCode = newCode;
+          $('create-form').hidden = true; $('create-done').hidden = false;
+          $('created-code').textContent = newCode;
+          $('created-copy').onclick = function () { copyText(newCode, this); };
+          $('created-qr').onclick = function () { $('create-modal').hidden = true; var c = classByCode(newCode); if (c) openQr(c); };
+          renderDashboard();
+        });
+      });
+    });
+
+    // ============ QR modal ============
+    function joinUrl(code) { return new URL('index.html?class=' + encodeURIComponent(code), location.href).href; }
+    function openQr(c) {
+      var url = joinUrl(c.code);
+      $('qr-title').textContent = c.name; $('qr-code').textContent = c.code;
+      var box = $('qr-box');
+      try { var q = window.qrcode(0, 'M'); q.addData(url); q.make(); box.innerHTML = q.createSvgTag({ cellSize: 6, margin: 2, scalable: true }); }
+      catch (e) { box.textContent = 'Could not generate the QR code.'; }
+      $('qr-copylink').onclick = function () { copyText(url, this); };
+      $('qr-modal').hidden = false;
+    }
+    $('qr-close').addEventListener('click', function () { $('qr-modal').hidden = true; });
+    $('qr-modal').addEventListener('click', function (e) { if (e.target === this) this.hidden = true; });
+
+    // ---- boot ----
+    renderNav('dashboard');
+    $('dash-classes').innerHTML = loadingBox();
+    loadAll().then(function () { renderDashboard(); });
   })();
   </script>
 </body>
