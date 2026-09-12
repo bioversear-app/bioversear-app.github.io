@@ -351,16 +351,31 @@
         b.addEventListener('click', function () { currentCode = b.getAttribute('data-code'); onPick(); });
       });
     }
-    function classBar(hostId, extra) {
+    function classBar(hostId) {
       var c = classByCode(currentCode); var host = $(hostId);
       if (!c) { host.innerHTML = ''; return; }
       var d = classData[c.code] || { students: [] }; var st = classStats(d.students);
       host.innerHTML =
         '<div class="t-classbar-inner"><span class="tcard-badge sm" aria-hidden="true">' + esc((c.name || 'C').trim()[0] || 'C').toUpperCase() + '</span>' +
         '<div class="t-classbar-txt"><div class="t-classbar-name">' + esc(c.name) + '</div>' +
-        '<div class="t-classbar-meta">Code <b>' + esc(c.code) + '</b> · ' + st.n + ' student' + (st.n === 1 ? '' : 's') + '</div></div>' +
-        '<button class="t-mini" type="button" id="' + hostId + '-copy">Copy code</button></div>';
-      var cp = $(hostId + '-copy'); if (cp) cp.addEventListener('click', function () { copyText(c.code, this); });
+        '<div class="t-classbar-meta">Code <b>' + esc(c.code) + '</b> · ' + st.n + ' student' + (st.n === 1 ? '' : 's') + '</div></div></div>' +
+        '<div class="t-classbar-acts">' +
+          '<button class="t-mini" type="button" data-a="copy">Copy code</button>' +
+          '<button class="t-mini" type="button" data-a="qr">Share QR</button>' +
+          '<button class="t-mini" type="button" data-a="rename">Rename</button></div>';
+      host.querySelector('[data-a="copy"]').addEventListener('click', function () { copyText(c.code, this); });
+      host.querySelector('[data-a="qr"]').addEventListener('click', function () { openQr(c); });
+      host.querySelector('[data-a="rename"]').addEventListener('click', function () {
+        var nn = prompt('Rename this class:', c.name); if (nn == null) return; nn = nn.trim();
+        if (!nn || nn === c.name) return;
+        BV.renameClass(c.id, nn).then(function (r) {
+          if (!r.ok) { alert(r.error); return; }
+          c.name = nn;
+          // reflect the new name everywhere
+          renderPicker(hostId === 'students-classbar' ? 'students-pick' : 'analytics-pick', hostId === 'students-classbar' ? renderStudents : renderAnalytics);
+          classBar(hostId);
+        });
+      });
     }
 
     // ============ STUDENTS ============

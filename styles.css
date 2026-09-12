@@ -1111,6 +1111,7 @@ form.acct-card .btn { margin-top: 2px; }
 .t-classbar-name { font-size: 15px; font-weight: 800; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .t-classbar-meta { font-size: 12px; color: var(--muted); }
 .t-classbar-meta b { color: var(--primary); }
+.t-classbar-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 
 /* ---- Search + filter ---- */
 .t-searchrow { display: flex; gap: 8px; margin-bottom: 12px; }
