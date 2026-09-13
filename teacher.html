@@ -257,6 +257,9 @@
     var CHECKICON = '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     var PEOPLEICON = '<svg class="tcard-count-ic" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M4 19c0-2.8 2.2-4.5 5-4.5s5 1.7 5 4.5M16 6a3 3 0 010 5.7M18 14c2 .4 3.4 1.7 3.4 3.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
     var STARICON = '<svg class="tcard-star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.5 6 .7-4.4 4.1 1.2 5.9L12 16.9 6.6 19.2l1.2-5.9L3.4 9.2l6-.7z" fill="#F5A524"/></svg>';
+    var STARSM = '<svg class="t-star-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.5 6 .7-4.4 4.1 1.2 5.9L12 16.9 6.6 19.2l1.2-5.9L3.4 9.2l6-.7z" fill="#F5A524"/></svg>';
+    var BADGEICON = '<svg class="t-badge-sm" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="9" r="5" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 13.5L7 21l5-2.5L17 21l-1.5-7.5" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>';
+    var CARETICON = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     function flashCopy(btn) { var o = btn.innerHTML; btn.innerHTML = CHECKICON; btn.classList.add('done'); setTimeout(function () { btn.innerHTML = o; btn.classList.remove('done'); }, 1200); }
 
     // ============ DASHBOARD ============
@@ -394,8 +397,9 @@
       var c = classByCode(currentCode); var host = $(hostId);
       if (!c) { host.innerHTML = ''; return; }
       var d = classData[c.code] || { students: [] }; var st = classStats(d.students);
+      var ci = classes.indexOf(c); var cth = classTheme(c.name, ci < 0 ? 0 : ci);
       host.innerHTML =
-        '<div class="t-classbar-inner"><span class="tcard-badge sm" aria-hidden="true">' + esc((c.name || 'C').trim()[0] || 'C').toUpperCase() + '</span>' +
+        '<div class="t-classbar-inner"><span class="tcard-badge sm" style="color:' + cth.color + ';background:' + cth.color + '1A" aria-hidden="true">' + cth.icon + '</span>' +
         '<div class="t-classbar-txt"><div class="t-classbar-name">' + esc(c.name) + '</div>' +
         '<div class="t-classbar-meta">Code <b>' + esc(c.code) + '</b> · ' + st.n + ' student' + (st.n === 1 ? '' : 's') + '</div></div></div>' +
         '<div class="t-classbar-acts">' +
@@ -460,9 +464,9 @@
             '<span class="tstu-user">@' + esc(info.alias) + '</span>' +
             '<span class="tstu-prog"><span class="pbar sm"><i style="width:' + s.completion + '%;background:' + progColor(s.completion) + '"></i></span>' +
               '<span class="tstu-progn">' + s.completion + '%</span></span></span>' +
-          '<span class="tstu-side"><span class="tstu-pts">⭐ ' + s.points.toLocaleString() + '</span>' +
-            '<span class="tstu-badges">🏅 ' + (Number(info.badges) || s.passedCount) + '</span></span>' +
-          '<span class="tstu-caret" aria-hidden="true">⌄</span></button>' +
+          '<span class="tstu-side"><span class="tstu-pts">' + STARSM + s.points.toLocaleString() + '</span>' +
+            '<span class="tstu-badges">' + BADGEICON + (Number(info.badges) || s.passedCount) + '</span></span>' +
+          '<span class="tstu-caret">' + CARETICON + '</span></button>' +
         '<div class="tstu-detail" hidden>' +
           '<div class="t-chips">' + chips + '</div>' +
           '<button class="btn secondary tstu-reset" type="button">Reset password</button>' +
@@ -504,10 +508,16 @@
 
       var avgScore = st.n ? Math.round(st.points / st.n) : 0;
       // overview tiles
+      var AIC = {
+        stu: '<svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 19c0-3 2.5-4.8 5.5-4.8s5.5 1.8 5.5 4.8M16 5.5a3 3 0 010 5.9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+        prog: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 19V11M12 19V5M19 19v-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+        pts: '<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.5 6 .7-4.4 4.1 1.2 5.9L12 16.9 6.6 19.2l1.2-5.9L3.4 9.2l6-.7z" fill="currentColor"/></svg>',
+        quiz: '<svg viewBox="0 0 24 24" fill="none"><path d="M6 3h9l4 4v14H6z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      };
       var overview =
         '<div class="t-astats">' +
-          aTile(st.n, 'Students') + aTile(st.prog + '%', 'Avg progress') +
-          aTile(avgScore.toLocaleString(), 'Avg points') + aTile(st.attempts, 'Quizzes taken') +
+          aTile(st.n, 'Students', AIC.stu, '#2E9E6B') + aTile(st.prog + '%', 'Avg progress', AIC.prog, '#7A4FD6') +
+          aTile(avgScore.toLocaleString(), 'Avg points', AIC.pts, '#C77D0A') + aTile(st.attempts, 'Quizzes taken', AIC.quiz, '#185FA5') +
         '</div>';
 
       // topic completion
@@ -538,7 +548,7 @@
         return '<div class="t-toprow"><span class="t-toprank r' + (i + 1) + '">' + (i + 1) + '</span>' +
                avatarCell(s.info, 'tstu-av sm') +
                '<span class="t-topname">' + esc(s.info.full_name || s.info.alias) + '<small>@' + esc(s.info.alias) + '</small></span>' +
-               '<span class="t-toppts">⭐ ' + s.points.toLocaleString() + '</span></div>';
+               '<span class="t-toppts">' + STARSM + s.points.toLocaleString() + '</span></div>';
       }).join('');
       var topPerf = '<h2 class="section-title">Top performing students</h2><div class="acct-card">' + topRows + '</div>';
 
@@ -556,7 +566,11 @@
 
       body.innerHTML = overview + topics + dist + topPerf + insights + trend;
     }
-    function aTile(v, l) { return '<div class="t-astat"><b>' + v + '</b><small>' + l + '</small></div>'; }
+    function aTile(v, l, icon, color) {
+      return '<div class="t-astat">' +
+             (icon ? '<span class="t-astat-ic" style="color:' + color + ';background:' + color + '1A">' + icon + '</span>' : '') +
+             '<b>' + v + '</b><small>' + l + '</small></div>';
+    }
     function legend(c, l, n) { return '<div class="t-leg"><span class="t-leg-dot" style="background:' + c + '"></span>' + l + '<b>' + n + '</b></div>'; }
 
     // ============ PROFILE ============
