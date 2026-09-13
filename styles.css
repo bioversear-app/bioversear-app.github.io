@@ -1102,6 +1102,16 @@ form.acct-card .btn { margin-top: 2px; }
 .t-hi:last-child { border-bottom: 0; }
 .t-hi-ic { flex: 0 0 auto; font-size: 17px; width: 26px; text-align: center; }
 
+/* ---- Recent Activity feed (Phase 2) ---- */
+.t-actlist { padding: 4px 14px; }
+.t-act { display: flex; align-items: center; gap: 11px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.t-act:last-child { border-bottom: 0; }
+.t-act-ic { flex: 0 0 auto; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; }
+.t-act-ic svg { width: 18px; height: 18px; }
+.t-act-txt { min-width: 0; flex: 1; }
+.t-act-txt b { display: block; font-size: 13.5px; font-weight: 700; color: var(--ink); line-height: 1.35; }
+.t-act-txt small { display: block; font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+
 /* ---- Empty states ---- */
 .t-empty { text-align: center; background: var(--surface-2); border-radius: 16px; padding: 30px 20px; }
 .t-empty-ic { font-size: 34px; margin-bottom: 8px; }

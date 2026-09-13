@@ -42,7 +42,7 @@
       <h2 class="section-title">Quick Actions</h2>
       <div class="t-quick" id="dash-quick"></div>
 
-      <h2 class="section-title">Highlights</h2>
+      <h2 class="section-title" id="dash-hi-title">Highlights</h2>
       <div id="dash-highlights"></div>
     </section>
 
@@ -139,6 +139,8 @@
     var classData = {};        // code -> { students:[...], loaded:true }
     var currentCode = null;    // selected class for Students / Analytics
     var loaded = false;
+    var activity = [];        // recent attempts WITH timestamps (Phase 2 RPC)
+    var topScore = null;      // highest single-quiz % (Phase 2 RPC)
 
     // ---- greeting + teacher name ----
     (function () {
@@ -225,11 +227,16 @@
       return BV.getTeacherClasses().then(function (list) {
         classes = list || [];
         if (!currentCode && classes.length) currentCode = classes[0].code;
-        return Promise.all(classes.map(function (c) {
-          return Promise.all([BV.getClassRoster(c.code), BV.getClassScores(c.code)]).then(function (res) {
-            classData[c.code] = { students: mergeStudents(res[0], res[1]), loaded: true };
-          });
-        }));
+        return Promise.all([
+          Promise.all(classes.map(function (c) {
+            return Promise.all([BV.getClassRoster(c.code), BV.getClassScores(c.code)]).then(function (res) {
+              classData[c.code] = { students: mergeStudents(res[0], res[1]), loaded: true };
+            });
+          })),
+          // Phase 2 (optional): resolve to []/null if the RPCs aren't applied yet.
+          BV.getTeacherActivity(12).then(function (a) { activity = a || []; }),
+          BV.getTeacherTopScore().then(function (t) { topScore = t; })
+        ]);
       }).then(function () { loaded = true; });
     }
 
@@ -281,13 +288,16 @@
         stu: '<svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 19c0-3 2.5-4.8 5.5-4.8s5.5 1.8 5.5 4.8M16 5.5a3 3 0 010 5.9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
         cls: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4zM4 10h16" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
         prog: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 19V11M12 19V5M19 19v-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
-        pts: '<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.5 6 .7-4.4 4.1 1.2 5.9L12 16.9 6.6 19.2l1.2-5.9L3.4 9.2l6-.7z" fill="currentColor"/></svg>'
+        pts: '<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.5 6 .7-4.4 4.1 1.2 5.9L12 16.9 6.6 19.2l1.2-5.9L3.4 9.2l6-.7z" fill="currentColor"/></svg>',
+        top: '<svg viewBox="0 0 24 24" fill="none"><path d="M8 21h8M12 17v4M6 4h12v4a6 6 0 01-12 0V4zM6 6H4v1a3 3 0 003 3M18 6h2v1a3 3 0 01-3 3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>'
       };
       $('dash-stats').innerHTML =
         statTile(IC.stu, ag.students, 'Students', '#2E9E6B', 'Across all classes') +
         statTile(IC.cls, ag.classes, ag.classes === 1 ? 'Class' : 'Classes', '#185FA5', ag.classes === 1 ? 'Active class' : 'Active classes') +
         statTile(IC.prog, ag.prog + '%', 'Avg. progress', '#7A4FD6', 'Class performance') +
-        statTile(IC.pts, ag.points.toLocaleString(), 'Total points', '#C77D0A', 'Points earned');
+        (topScore && typeof topScore.best_pct === 'number'
+          ? statTile(IC.top, topScore.best_pct + '%', 'Top score', '#C77D0A', 'Highest quiz score')
+          : statTile(IC.pts, ag.points.toLocaleString(), 'Total points', '#C77D0A', 'Points earned'));
 
       // class cards
       var host = $('dash-classes'); host.innerHTML = '';
@@ -343,7 +353,7 @@
         });
       });
 
-      renderHighlights(ag);
+      renderActivity(ag);
     }
 
     function renderHighlights(ag) {
@@ -362,6 +372,47 @@
       if (!items.length) items.push(hi('🌱', 'Students have joined — encourage them to start a quiz!'));
       host.innerHTML = '<div class="acct-card t-hilist">' + items.join('') + '</div>';
     }
+    // ---- Recent Activity (Phase 2) --------------------------------------
+    // Real rows from public.attempts with their real updated_at. If the Phase 2
+    // RPC hasn't been applied, `activity` is [] and we fall back to Highlights.
+    var TOPICNAME = {};
+    (window.TOPICS || []).forEach(function (t) { TOPICNAME[t.id] = t.name; });
+    function topicName(id) { return TOPICNAME[id] || id; }
+    function timeAgo(iso) {
+      var t = new Date(iso).getTime();
+      if (!t || isNaN(t)) return '';
+      var s = Math.max(0, Math.floor((Date.now() - t) / 1000));
+      if (s < 60) return 'just now';
+      var m = Math.floor(s / 60); if (m < 60) return m + (m === 1 ? ' minute ago' : ' minutes ago');
+      var h = Math.floor(m / 60); if (h < 24) return h + (h === 1 ? ' hour ago' : ' hours ago');
+      var d = Math.floor(h / 24); if (d < 7) return d + (d === 1 ? ' day ago' : ' days ago');
+      var w = Math.floor(d / 7); if (w < 5) return w + (w === 1 ? ' week ago' : ' weeks ago');
+      var mo = Math.floor(d / 30); if (mo < 12) return mo + (mo === 1 ? ' month ago' : ' months ago');
+      var y = Math.floor(d / 365); return y + (y === 1 ? ' year ago' : ' years ago');
+    }
+    var ACT_PASS = '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    var ACT_TRY = '<svg viewBox="0 0 24 24" fill="none"><path d="M6 3h9l4 4v14H6z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
+    function renderActivity(ag) {
+      var host = $('dash-highlights'), title = $('dash-hi-title');
+      if (!activity.length) { if (title) title.textContent = 'Highlights'; renderHighlights(ag); return; }
+      if (title) title.textContent = 'Recent Activity';
+      var rows = activity.slice(0, 8).map(function (r) {
+        var who = esc(r.full_name || r.alias || 'A student');
+        var tn = esc(topicName(r.topic_id));
+        var passed = !!r.passed;
+        var main = passed ? (who + ' passed ' + tn) : (who + ' tried ' + tn);
+        var bits = [];
+        if (Number(r.max) > 0) bits.push(r.score + '/' + r.max + ' (' + Math.round(r.score * 100 / r.max) + '%)');
+        if (r.class_name) bits.push(esc(r.class_name));
+        var ago = timeAgo(r.updated_at); if (ago) bits.push(ago);
+        var col = passed ? '#2E9E6B' : '#185FA5';
+        return '<div class="t-act"><span class="t-act-ic" style="color:' + col + ';background:' + col + '1A">' +
+               (passed ? ACT_PASS : ACT_TRY) + '</span>' +
+               '<span class="t-act-txt"><b>' + main + '</b><small>' + bits.join(' · ') + '</small></span></div>';
+      }).join('');
+      host.innerHTML = '<div class="acct-card t-actlist">' + rows + '</div>';
+    }
+
     function hi(emoji, text) { return '<div class="t-hi"><span class="t-hi-ic" aria-hidden="true">' + emoji + '</span><span>' + text + '</span></div>'; }
     function topTopicAcross(all) {
       if (!all.length) return null;

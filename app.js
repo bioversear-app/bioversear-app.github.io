@@ -350,6 +350,23 @@
       var c = sb(); if (!c) return Promise.resolve([]);
       return c.rpc('get_class_scores', { p_code: code }).then(function (r) { return (r.error || !r.data) ? [] : r.data; }).catch(function () { return []; });
     },
+    // Recent results across every class this teacher owns, newest first, WITH
+    // timestamps. Returns [] if the Phase 2 RPC hasn't been applied yet, so the
+    // teacher page simply falls back to the current-state Highlights.
+    getTeacherActivity: function (limit) {
+      var c = sb(); if (!c) return Promise.resolve([]);
+      return c.rpc('get_teacher_activity', { p_limit: limit || 20 })
+        .then(function (r) { return (r.error || !r.data) ? [] : r.data; })
+        .catch(function () { return []; });
+    },
+    // Highest single-quiz percentage across this teacher's classes, or null if
+    // the RPC isn't there yet / nobody has taken a scored quiz.
+    getTeacherTopScore: function () {
+      var c = sb(); if (!c) return Promise.resolve(null);
+      return c.rpc('get_teacher_topscore')
+        .then(function (r) { return (r.error || !r.data || !r.data.length) ? null : r.data[0]; })
+        .catch(function () { return null; });
+    },
     renameClass: function (id, name) {
       var c = sb(); if (!c) return Promise.resolve({ ok: false, error: 'No connection.' });
       return c.rpc('rename_class', { p_id: id, p_name: name }).then(function (r) {
